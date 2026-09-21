@@ -183,8 +183,12 @@ def main(argv: list[str] | None = None) -> int:
     targets: list[dict] = []
     if args.harnesses:
         installer = load_installer(args)
+        extra_env = dict(kv.split("=", 1) for kv in args.env)
         for server_id in installer.mcp_servers_to_mount():
-            env = installer.mcp_env(server_id)
+            # --env overrides the recorded env (a sandbox needs UV_CACHE_DIR/UV_TOOL_DIR,
+            # and without this the documented workaround silently did nothing here).
+            env = dict(installer.mcp_env(server_id))
+            env.update(extra_env)
             targets.append({
                 "name": server_id,
                 "command": installer.mcp_command(server_id),

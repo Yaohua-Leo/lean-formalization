@@ -105,6 +105,9 @@ def main(argv: list[str] | None = None) -> int:
         Step("validate-repo", ["node", "verify/validate_repo.mjs"], required=True),
         Step("smoke", [python, "verify/smoke.py", "--with-gate", "--work", str(smoke_work)],
              required=True, note="install → assert → idempotence → uninstall, plus a real Lean build"),
+        Step("gate-shell", [python, "verify/check_gate_shell.py"], required=True,
+             note="the POSIX gate's embedded Python: parses, reads config, enforces the whitelist "
+                  "(the shell wrapper itself needs a real bash and is not covered)"),
     ]
 
     if not args.no_probe and shutil.which("uvx"):

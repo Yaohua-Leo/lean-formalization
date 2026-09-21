@@ -34,7 +34,8 @@ python verify/probe_mcp.py --harnesses --project /你的/lean/项目            
 `install.ps1` 与 `install.sh` 只是同一个 Python 安装器的薄启动器，所以 PowerShell
 与 POSIX 两条路不会各自漂移。
 
-幂等：第二次运行什么都不写。可回滚：`--uninstall` 恢复全部备份，只删除自己创建过的文件。
+幂等：第二次运行逐字节不写任何东西。可回滚：`--uninstall` 恢复全部备份，只删除自己创建过的
+文件，你后来改过的文件会留在原处并报告出来。
 
 ## 支持的 harness
 

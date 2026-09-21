@@ -42,7 +42,9 @@ import json, shlex, sys
 cfg = json.load(open(sys.argv[1], encoding='utf-8'))
 if not cfg.get('library'):
     sys.exit('leancheck: config has no "library"')
-def q(v): return shlex.quote(str(v))print('LIBRARY=%s' % q(cfg['library']))
+def q(v):
+    return shlex.quote(str(v))
+print('LIBRARY=%s' % q(cfg['library']))
 for key, var in (('targets', 'TARGETS'), ('entryModules', 'ENTRY'), ('buildTargets', 'BUILD'),
                  ('allowedAxioms', 'ALLOWED'), ('gitSafeDirectories', 'SAFEDIRS')):
     vals = cfg.get(key) or []

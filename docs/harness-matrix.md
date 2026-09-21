@@ -9,7 +9,7 @@ and was not verified.
 | Status | Meaning |
 |---|---|
 | **verified (files)** | the installer's writes were executed and asserted on the authoring machine (temp home + fixture project), and every config file still parses |
-| **verified (MCP)** | the exact command this harness's configuration records was launched over stdio, `initialize` + `tools/list` succeeded, and the expected tool names were present/absent (`verify/probe_mcp.py`) |
+| **verified (MCP)** | the command this repository records for that server was launched over stdio, `initialize` + `tools/list` succeeded, and the expected tool names were present/absent (`verify/probe_mcp.py`). Note: the `--harnesses` form *re-derives* the command from `harnesses.json` plus live detection; it does not read any harness's config file, so it shows the server works, not that the harness loaded it |
 | **harness-reads-it** | the harness's own CLI listing confirmed it read the written configuration |
 | **unverified** | the path/format comes from documentation or convention only. Nothing was run against that harness |
 
@@ -21,7 +21,7 @@ until the user starts a new session in that harness.
 
 | Harness | Instruction file(s) | Skill roots | MCP configuration | Config format | Status on the authoring machine |
 |---|---|---|---|---|---|
-| DSH (DeepSeek Harness) | rendered preset (`persona.prefix`) | `<agents>/skills`, `<DSH_HOME>/skills`, `<project>/.agents/skills`, `<project>/.dsh/skills` | `<DSH_HOME>/.agent-presets/lean/agent.cordis.yml` | YAML rows, two `dsh-mcp-client` rows | files written; preset parses (19–20 rows); no live session restarted |
+| DSH (DeepSeek Harness) | rendered preset (`persona.prefix`) | `<agents>/skills`, `<DSH_HOME>/skills`, `<project>/.agents/skills`, `<project>/.dsh/skills` | `<DSH_HOME>/.agent-presets/lean/agent.cordis.yml` | YAML rows: one `dsh-mcp-client` row in `lsp-fallback`, two in `beam` | files written; preset parses (19 rows in fallback, 20 in beam); no live session restarted |
 | Claude Code | `~/.claude/CLAUDE.md`, `<project>/CLAUDE.md` | `~/.claude/skills`, `<project>/.claude/skills` | `<project>/.mcp.json` | JSON, `mcpServers` | files written + **harness reads it** (`claude mcp list` → `lean-lsp`) |
 | Codex CLI | `~/.codex/AGENTS.md`, `<project>/AGENTS.md` | `~/.codex/skills` | `~/.codex/config.toml` | TOML, `[mcp_servers.<name>]` | files written + **harness reads it** (`codex mcp list` → `lean-lsp`, enabled) |
 | OpenCode | `~/.config/opencode/AGENTS.md`, `<project>/AGENTS.md` | `~/.config/opencode/skills`, `~/.agents/skills`, `<project>/.opencode/skills`, `<project>/.agents/skills` | `~/.config/opencode/opencode.json`, `<project>/opencode.json` | JSON; **`mcp.<name>` + `enabled` on 1.x, `mcp.servers.<name>` on 2.x** | files written + **harness reads it** (`opencode mcp list` → `1 server(s)`, `lean-lsp`) |

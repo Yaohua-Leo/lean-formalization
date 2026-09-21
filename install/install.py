@@ -84,12 +84,18 @@ class Installer:
 
         self.home = Path(args.home).expanduser().resolve() if args.home else Path.home().resolve()
         self.project = Path(args.project).expanduser().resolve()
+        # `--home` means "act as if this were the home directory". Ambient DSH_* env
+        # variables must not leak a scratch run into the real DSH home, so they are
+        # only consulted when --home was not given.
+        explicit_home = bool(args.home)
         self.dsh_home = (
             Path(args.dsh_home).expanduser().resolve()
             if args.dsh_home
             else Path(
                 os.environ.get("DSH_HOME") or (self.home / ".dsh")
             ).expanduser().resolve()
+            if not explicit_home
+            else (self.home / ".dsh").resolve()
         )
         self.agents_home = (
             Path(args.agents_home).expanduser().resolve()
@@ -97,6 +103,8 @@ class Installer:
             else Path(
                 os.environ.get("DSH_AGENTS_HOME") or (self.home / ".agents")
             ).expanduser().resolve()
+            if not explicit_home
+            else (self.home / ".agents").resolve()
         )
         self.scope = args.scope  # project | user | both
         self.stamp = utc_stamp()
@@ -174,7 +182,10 @@ class Installer:
                     if "launcher" in probe:
                         # Only the path token is substituted; the rest are argv words
                         # like `powershell.exe` or `-NoProfile` and must stay verbatim.
-                        cmd = [x.replace("<project>", str(self.project)) for x in probe["launcher"]]
+                        # Forward slashes keep the same text valid in every harness's
+                        # config format (JSON needs escaping, TOML does not).
+                        project = str(self.project).replace("\\", "/")
+                        cmd = [x.replace("<project>", project) for x in probe["launcher"]]
                     else:
                         cmd = [str(path)]
                     return {"how": str(path), "command": cmd}
@@ -418,13 +429,21 @@ class Installer:
                             "label": "%s: mcp server %s -> %s" % (hid, server_id, path),
                         })
                 else:
+                    array_name = mcp.get("arrayOfTables")
                     for server_id in self.mcp_servers_to_mount():
-                        self.actions.append({
+                        action = {
                             "kind": "toml_table", "path": path, "scope": target["scope"],
-                            "table": mcp.get("table", "mcp_servers").replace("{name}", server_id),
                             "fields": self.toml_fields(hid, server_id),
                             "label": "%s: mcp server %s -> %s" % (hid, server_id, path),
-                        })
+                        }
+                        if array_name:
+                            # One [[table]] per server: a single [table] would make the
+                            # second server overwrite the first.
+                            action["array_of_tables"] = array_name
+                            action["name"] = server_id
+                        else:
+                            action["table"] = mcp.get("table", "mcp_servers").replace("{name}", server_id)
+                        self.actions.append(action)
 
     def json_shape(self, hid: str, server_id: str, mcp: dict) -> tuple[list[str], dict, list[str] | None]:
         """Key path, entry object and any stale key path to clean up, for this harness."""
@@ -473,20 +492,23 @@ class Installer:
         raise SystemExit("no JSON entry shape for harness %s" % hid)
 
     def toml_fields(self, hid: str, server_id: str) -> dict:
-        if hid == "codex":
-            return {
-                "command": self.mcp_command(server_id)[0],
-                "args": self.mcp_command(server_id)[1:],
-                "env": self.mcp_env(server_id),
-            }
-        if hid == "mistral-vibe":
-            return {
-                "name": server_id,
-                "transport": "stdio",
-                "command": self.mcp_command(server_id)[0],
-                "args": self.mcp_command(server_id)[1:],
-            }
-        raise SystemExit("no TOML shape for harness %s" % hid)
+        """Entry fields for a TOML harness, read from its `fields` template."""
+        mcp = self.spec["harnesses"][hid]["mcp"]
+        spec_fields = mcp.get("fields")
+        if not spec_fields:
+            raise SystemExit("harness %s has no TOML field template in harnesses.json" % hid)
+        return {key: self.placeholder_value(value, server_id) for key, value in spec_fields.items()}
+
+    def placeholder_value(self, value, server_id: str):
+        if value == "{name}":
+            return server_id
+        if value == "{command}":
+            return self.mcp_command(server_id)[0]
+        if value == "{args}":
+            return self.mcp_command(server_id)[1:]
+        if value == "{env}":
+            return self.mcp_env(server_id)
+        return value
 
     def plan_dsh(self) -> None:
         if "dsh" not in self.detected:
@@ -669,7 +691,10 @@ class Installer:
                 self.apply_file(path, new_text.encode("utf-8"), action)
                 return
             if kind == "toml_table":
-                new_text = self.compose_toml_table(path, action)
+                if action.get("array_of_tables"):
+                    new_text = self.compose_toml_array_table(path, action)
+                else:
+                    new_text = self.compose_toml_table(path, action)
                 self.apply_file(path, new_text.encode("utf-8"), action)
                 return
         if kind == "exec":
@@ -798,6 +823,58 @@ class Installer:
                 break
         return existing[:start] + block + existing[end:]
 
+    def toml_array_block(self, name: str, fields: dict) -> str:
+        lines = ["[[%s]]" % name]
+        for key, value in fields.items():
+            if isinstance(value, dict):
+                # An array element cannot carry a sub-table of the same name; Vibe's
+                # schema has no env field, so drop it loudly rather than emit a table
+                # that would silently attach to the last element.
+                if value:
+                    self.warnings.append(
+                        "[[%s]] entry has env keys that this harness's format cannot express: %s"
+                        % (name, ", ".join(value))
+                    )
+                continue
+            if isinstance(value, list):
+                lines.append("%s = [%s]" % (key, ", ".join(_toml_scalar(v) for v in value)))
+            else:
+                lines.append("%s = %s" % (key, _toml_scalar(value)))
+        return "\n".join(lines) + "\n\n"
+
+    def compose_toml_array_table(self, path: Path, action: dict) -> str:
+        """Replace OUR [[table]] entry (matched by its `name` field), keep the rest."""
+        name = action["array_of_tables"]
+        server = action["name"]
+        header = "[[%s]]" % name
+        lines = read_text(path).splitlines(keepends=True) if path.is_file() else []
+        kept: list[str] = []
+        index = 0
+        while index < len(lines):
+            line = lines[index]
+            if line.strip() == header:
+                chunk = [line]
+                index += 1
+                while index < len(lines) and not lines[index].lstrip().startswith("["):
+                    chunk.append(lines[index])
+                    index += 1
+                body = "".join(chunk)
+                if re.search(r'(?m)^\s*name\s*=\s*"%s"\s*$' % re.escape(server), body):
+                    continue  # ours: it is replaced below
+                kept.append(body)
+                continue
+            kept.append(line)
+            index += 1
+        text = "".join(kept)
+        # Vibe's own documentation asks for a bare `mcp_servers = []` to be removed
+        # before the first table is added.
+        text = re.sub(r"(?m)^%s\s*=\s*\[\s*\]\s*\n" % re.escape(name), "", text)
+        if text and not text.endswith("\n"):
+            text += "\n"
+        if text.strip():
+            text += "\n"
+        return text + self.toml_array_block(name, action["fields"])
+
     def toml_block(self, table: str, fields: dict) -> str:
         lines = ["[%s]" % table]
         for key, value in fields.items():
@@ -826,10 +903,13 @@ class Installer:
             root = (self.project if scope == "project" else self.home) / ".lean-formalization"
             manifest_path = root / "manifest.json"
             previous = {}
+            previous_stamp = self.stamp
             if manifest_path.is_file():
                 try:
-                    for old in json.loads(read_text(manifest_path))["files"]:
+                    loaded = json.loads(read_text(manifest_path))
+                    for old in loaded["files"]:
                         previous[old["path"]] = old
+                    previous_stamp = loaded.get("stamp") or self.stamp
                 except (json.JSONDecodeError, KeyError):
                     self.warnings.append("previous manifest was unreadable; it is replaced, not merged")
             for entry in entries:
@@ -838,26 +918,32 @@ class Installer:
                     previous[entry["path"]] = entry
                     continue
                 # Keep what the FIRST run learned about a path: whether we created
-                # it, and where its original content was saved. Later runs see an
-                # already-matching file and would otherwise erase that knowledge.
+                # it, where its original content was saved, and when. Later runs see
+                # an already-matching file and would otherwise erase that knowledge —
+                # and a fresh timestamp every run would make the file change even when
+                # nothing did.
                 merged = dict(entry)
                 merged["created"] = bool(old.get("created"))
                 merged["backup"] = old.get("backup") or entry.get("backup")
                 merged["keep"] = bool(old.get("keep") or entry.get("keep"))
+                merged["stamp"] = old.get("stamp", entry["stamp"])
                 previous[entry["path"]] = merged
-            write_text(
-                manifest_path,
-                json.dumps(
-                    {
-                        "tool": TAG,
-                        "stamp": self.stamp,
-                        "scope": scope,
-                        "uninstall": "python install/install.py --uninstall",
-                        "files": sorted(previous.values(), key=lambda e: e["path"]),
-                    },
-                    indent=2,
-                ) + "\n",
-            )
+            payload = json.dumps(
+                {
+                    "tool": TAG,
+                    "stamp": previous_stamp,
+                    "scope": scope,
+                    "uninstall": "python install/install.py --uninstall",
+                    "files": sorted(previous.values(), key=lambda e: e["path"]),
+                },
+                indent=2,
+            ) + "\n"
+            if manifest_path.is_file() and read_text(manifest_path) == payload:
+                # Nothing changed: leave the file untouched so that "a second run
+                # writes nothing" is true at byte level, not just in spirit.
+                print("    = %s (unchanged)" % manifest_path)
+                continue
+            write_text(manifest_path, payload)
 
     def report(self, chosen: list[str]) -> None:
         print("")
@@ -954,7 +1040,7 @@ def cmd_install(args: argparse.Namespace) -> int:
     else:
         print("")
         print("next: restart the harnesses you use (or start a new session), then verify with")
-        print("      python verify/probe_mcp.py --from-harnesses")
+        print("      python verify/probe_mcp.py --harnesses --project .   (add --env UV_CACHE_DIR=… in a sandbox)")
         print("uninstall: python install/install.py --uninstall")
     return 0
 

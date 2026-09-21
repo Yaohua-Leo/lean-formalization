@@ -99,17 +99,43 @@ for (const owned of spec.skills?.owned ?? []) {
 
 // ── 4. vendored content ledger ──────────────────────────────────────────────
 const provenance = read('skills/PROVENANCE.md')
-const vendoredRoot = join(skillsRoot, 'lean-beam')
+const hash = (file) => createHash('sha256').update(readFileSync(file)).digest('hex')
 const walk = (dir) => readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
   const full = join(dir, entry.name)
   return entry.isDirectory() ? walk(full) : [full]
 })
-for (const file of walk(vendoredRoot)) {
-  const rel = relative(REPO, file).replace(/\\/g, '/')
-  const digest = createHash('sha256').update(readFileSync(file)).digest('hex')
-  check(provenance.includes(digest), `PROVENANCE.md does not record ${rel} (${digest})`)
-  check(provenance.includes(rel), `PROVENANCE.md does not name ${rel}`)
+// Every row of the ledger is enforced, not just the skill directory: the license
+// text is vendored too, and "validate_repo fails if a vendored byte changes" has to
+// be true for all of it.
+const ledgerRows = [...provenance.matchAll(/\|\s*`([^`]+)`\s*\|\s*`([0-9a-f]{64})`\s*\|/g)]
+  .map((match) => ({ path: match[1], digest: match[2] }))
+check(ledgerRows.length >= 8, `PROVENANCE.md lists only ${ledgerRows.length} hashed files`)
+for (const row of ledgerRows) {
+  const file = join(REPO, row.path)
+  check(existsSync(file), `PROVENANCE.md names a file that does not exist: ${row.path}`)
+  if (existsSync(file)) {
+    check(hash(file) === row.digest, `vendored file does not match its recorded hash: ${row.path}`)
+  }
 }
+for (const file of walk(join(skillsRoot, 'lean-beam'))) {
+  const rel = relative(REPO, file).replace(/\\/g, '/')
+  check(ledgerRows.some((row) => row.path === rel), `PROVENANCE.md does not record ${rel}`)
+}
+
+// Entry shapes: the installer renders them, but the table must still carry one for
+// every harness that needs it, or that surface silently writes nothing.
+for (const [id, h] of Object.entries(spec.harnesses ?? {})) {
+  const mcp = h.mcp ?? {}
+  if (mcp.method === 'file-json') {
+    check(Boolean(mcp.entry) || Boolean(mcp.shapeByMajor), `${id}: file-json without an entry template`)
+    check(Array.isArray(mcp.keyPath) || Boolean(mcp.shapeByMajor), `${id}: file-json without a keyPath`)
+  }
+  if (mcp.method === 'file-toml') {
+    check(Boolean(mcp.fields), `${id}: file-toml without a fields template`)
+    check(Boolean(mcp.table) || Boolean(mcp.arrayOfTables), `${id}: file-toml without a table name`)
+  }
+}
+check(spec.skills.beam.commit.length === 40, 'harnesses.json: beam commit is not a full sha')
 check(provenance.includes(spec.skills.beam.commit), 'PROVENANCE.md does not record the pinned lean-beam commit')
 check(provenance.includes(spec.skills.upstream.commit), 'PROVENANCE.md does not record the pinned leanprover/skills commit')
 

@@ -188,10 +188,18 @@ def main(argv: list[str] | None = None) -> int:
                       good, json.dumps(mcp)[:120])
 
     # ── 2. idempotence ──────────────────────────────────────────────────────
+    manifests = [project / ".lean-formalization" / "manifest.json",
+                 home / ".lean-formalization" / "manifest.json"]
+    before = {p: (p.read_bytes() if p.is_file() else None) for p in manifests}
     second = run_installer(*common, "--scope", "both")
     writes = [l for l in second.stdout.splitlines() if l.startswith("    +") or l.startswith("    ~")]
     checker.check("second install writes nothing", second.returncode == 0 and not writes,
                   "; ".join(writes[:3]))
+    # Bytes, not just the "+/~" lines: the manifests used to be rewritten every run.
+    changed = [p.name for p in manifests
+               if (p.read_bytes() if p.is_file() else None) != before[p]]
+    checker.check("second install leaves every file byte-identical", not changed,
+                  ", ".join(changed))
 
     # ── 3. uninstall ────────────────────────────────────────────────────────
     # The user edits a file the installer created; uninstall must not delete it.

@@ -68,9 +68,10 @@ python install/install.py --project "$(pwd)" --scope both --dry-run
 
 The plan tells you, before anything is written:
 
-- which harnesses were detected (tier-1 harnesses are the ones whose config paths
-  were verified end-to-end on the authoring machine; tier-2 ones are opt-in via
-  `--include-unverified`);
+- which harnesses were detected (tier 1 = the config paths were checked against the
+  harness or its documentation on the authoring machine, and the per-harness status
+  column in `docs/harness-matrix.md` says what was actually run; tier-2 harnesses are
+  opt-in via `--include-unverified`);
 - which MCP mode was chosen (`beam` when a `lean-beam-mcp` launcher or a project
   `tools/beam-mcp.ps1` is present, otherwise `lsp-fallback`);
 - which prerequisite is missing (`uvx` is required for the Lean LSP server;
@@ -156,19 +157,24 @@ python verify/smoke.py --with-gate  # install → assert → idempotence → uni
 python install/install.py --doctor --project "$(pwd)"
 ```
 
-Then assert that the MCP servers actually start. This launches the exact command
-recorded in the configuration and lists its tools over stdio:
+Then assert that the MCP servers actually start. This launches the command this
+repository records for each server (re-derived from `harnesses.json` and live
+detection — it does not read any harness's config file) and lists its tools over
+stdio:
 
 ```bash
 python verify/probe_mcp.py --harnesses --project "$(pwd)"
 ```
 
 Expected: exit 0, `lean-lsp` reports its tools, and no disabled tool name appears
-in the list. In `beam` mode also expect `lean-beam` to answer.
+in the list. In `beam` mode also expect `lean-beam` to answer. Inside a sandbox
+that blocks `uv`'s cache, add `--env UV_CACHE_DIR=… --env UV_TOOL_DIR=…`.
 
 `--doctor` is a report, not a proof: it shows detection and file presence.
-**A file being present is not the same as a harness having loaded it.** Only a new
-session in that harness proves that.
+**A file being present is not the same as a harness having loaded it.** To show
+that, ask the harness itself — `claude mcp list`, `CODEX_HOME=… codex mcp list`,
+`opencode mcp list` — and remember that only a new session proves a harness
+actually picked the configuration up.
 
 If the Lean project already has `LeanAudit.lean` or `scripts/leancheck.*`, the
 installer leaves those files alone and says so. Do not "fix" them: the project's

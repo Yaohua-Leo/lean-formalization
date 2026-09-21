@@ -11,9 +11,10 @@ listed here with its exit code, it was not run.
 | 1 | `node verify/validate_repo.mjs` | the adapter table's schema holds, the skills have valid frontmatter and kebab-case names, the vendored files match their recorded hashes, every documented file exists, the gate and DSH templates are still project-agnostic | that any harness reads any of it |
 | 2 | `python verify/smoke.py` | install writes the expected surfaces into a throwaway home+project; every JSON/TOML file still parses; a second install writes nothing; user prose outside the block survives; uninstall removes what it created, restores what it changed, keeps a file the user edited, and leaves the project's own config alone | anything about a real harness instance |
 | 3 | `python verify/smoke.py --with-gate` | additionally: the scaffolded `LeanAudit.lean` + `leancheck` really build a Lean project, refuse an empty target list, pass a whitelisted target, and fail a whitelist violation | that another project's gate should behave the same |
-| 4 | `python verify/probe_mcp.py --harnesses` | the exact command recorded in the configuration starts a real MCP server over stdio, `initialize` + `tools/list` succeed, and the expected tool names are present while the disabled ones are absent | that a harness has loaded the configuration |
+| 4 | `python verify/probe_mcp.py --harnesses` (or `--command …`) | the recorded command starts a real MCP server over stdio, `initialize` + `tools/list` succeed, and the expected tool names are present while the disabled ones are absent. `--harnesses` re-derives the command from `harnesses.json` and live detection; it reads no harness config file, so it does not show that a harness loaded anything | that a harness has loaded the configuration |
 | 5 | `python install/install.py --doctor` | per-harness detection and file presence | nothing about runtime behaviour |
-| 6 | the harness's own CLI (`claude mcp list`, …) | that the harness **read** the file the installer wrote | that the user has approved it, or that a model can call the tools |
+| 6 | the harness's own CLI (`claude mcp list`, `codex mcp list`, `opencode mcp list`, …) | that the harness **read** the file the installer wrote | that the user has approved it, that a *new session* picks it up, or that a model can call the tools |
+| 7 | `python verify/check_gate_shell.py` | that the POSIX gate's embedded Python parses, that its config reader emits what the shell consumes, and that its whitelist check accepts/rejects correctly | that the surrounding **shell** logic runs — only a real bash can show that |
 
 Steps 1–3 are deterministic and must exit 0. Step 4 needs network/`uv` (the Lean
 LSP server is fetched by `uvx` on first use). Step 6 exists for as many harnesses
@@ -26,15 +27,42 @@ The summary at the time of publication:
 
 | Check | Result |
 |---|---|
-| `node verify/validate_repo.mjs` | see `evidence/…/report.json` |
-| `python verify/smoke.py --with-gate` | see `evidence/…/report.json` (12 checks incl. the OpenCode shape assertion, plus a real Lean build and a whitelist pass/fail pair) |
+| `node verify/validate_repo.mjs` | see `evidence/…/report.json` (tamper controls: editing a vendored skill **or** `licenses/lean-beam-LICENSE` now fails it) |
+| `python verify/check_gate_shell.py` | both embedded Python blocks parse; the config reader emits the assignments the shell consumes; the whitelist check accepts a whitelisted target, rejects an out-of-whitelist axiom and a never-reported target, and writes `LATEST.md` |
+| `python verify/smoke.py --with-gate` | see `evidence/…/report.json` (13 checks incl. the OpenCode shape assertion and byte-level idempotence, plus a real Lean build and a whitelist pass/fail pair) |
 | `python verify/probe_mcp.py --command "uvx lean-lsp-mcp" …` | 21 tools, expected names present, `lean_build`/`lean_run_code` absent |
 | `claude mcp list` in the installed fixture | reported `lean-lsp: uvx lean-lsp-mcp` (pending approval) — the harness read the file |
 | `CODEX_HOME=<tmp> codex mcp list` | `lean-lsp` row, status `enabled` — the harness read the file |
-| `XDG_*=<tmp> opencode mcp list` | `1 server(s)`, `lean-lsp` — the harness read the file (its health check cannot spawn `uvx` inside the sandbox, which is not a config failure) |
+| `XDG_*=<tmp> opencode mcp list` | `1 server(s)`, `lean-lsp` — the harness read the file (its health check is refused permission to spawn `uvx`/`git` inside the sandbox, which is not a config failure) |
 | independent hash re-check of `skills/PROVENANCE.md` (second implementation, not the validator) | 8/8 files match |
 | `python install/install.py --doctor` | see `evidence/…/report.json` |
 | Jordan project dry run | plan inspected, no write performed |
+
+### Findings from the independent review of `98e981c`, and what changed
+
+A reviewer who did not write this repository checked commit `98e981c` against a
+`git archive` export of it. It confirmed claims 1, 3 and 7 outright and found the
+following, all of which were fixed in the commit that carries this file:
+
+| Finding | Fix |
+|---|---|
+| `gate/leancheck.sh` had a Python syntax error in its first heredoc, so the POSIX gate could never pass anything (static, not environmental) | repaired, and `verify/check_gate_shell.py` now parses **and runs** both embedded blocks; it is a required acceptance step |
+| Mistral Vibe: the two servers collided on one `[mcp_servers]` table, so `lean-beam` was silently dropped in beam mode | array-of-tables support: one `[[mcp_servers]]` per server, matched by its `name` field; `tool_timeout_sec` is written too |
+| The published evidence contained no raw `command-*.log` files (`.gitignore` swallowed them) while the docs pointed at them | `.gitignore` negates `evidence/**/*.log`; the current run's logs are committed |
+| "a second run writes nothing" was false at byte level (both manifests were rewritten) | manifests are written only when their content changes; `smoke.py` now compares bytes |
+| `install.py` printed a next step using `--from-harnesses`, a flag that does not exist | prints `--harnesses` |
+| `--harnesses --env …` ignored `--env`, so the documented sandbox workaround did nothing there | `--env` now overrides the recorded env in that mode too |
+| `licenses/lean-beam-LICENSE` was in the ledger but not enforced | the validator enforces every ledger row (tamper-controlled) |
+| harness matrix documented a "status column" that no table had | the tier-1 table now carries a per-harness status column |
+| "the exact command this harness's configuration records" overstated what `--harnesses` does | corrected in the matrix, `acceptance.md` and `BOOTSTRAP.md`: it re-derives the command, it reads no harness config |
+| `DSH_HOME`/`DSH_AGENTS_HOME` overrode `--home`, so a scratch run could write into the real DSH home | with an explicit `--home`, both are derived from it |
+| Vibe's `arrayOfTables`/`fields` and the beam `detect` entry described behaviour the code did not have | the code now consumes the TOML `fields` template, and the beam entry says what is actually checked |
+
+The review is bound to `98e981c`; its verdicts do not automatically apply to later
+commits. Residual unknowns it listed that this work does **not** resolve: no DSH
+session was started, `lean-beam-mcp` is not installed here so Beam was never probed
+end to end, `gemini mcp` / `code --add-mcp` / `vibe` were never run, and the shell
+wrapper of `leancheck.sh` still needs a real bash to exercise.
 
 Not run, and therefore `unknown`:
 

@@ -122,7 +122,8 @@
         "detect": [
           {
             "kind": "command",
-            "value": "lean-beam-mcp --version"
+            "value": "lean-beam-mcp",
+            "note": "presence on PATH is what the installer checks (which/where); it does not run --version"
           },
           {
             "kind": "path",
@@ -615,7 +616,7 @@
           "args": "{args}",
           "tool_timeout_sec": 600
         },
-        "note": "Removing an existing `mcp_servers = []` line is required before appending tables."
+        "note": "Vibe takes an ARRAY of tables, one [[mcp_servers]] per server. Writing a single [mcp_servers] table would make the second server overwrite the first, so each server gets its own block and blocks are matched by their `name` field. A bare `mcp_servers = []` line is removed when the first block is added — Vibe's own documentation asks for that."
       },
       "reload": "Restart Vibe.",
       "verified": {

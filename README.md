@@ -36,8 +36,9 @@ python verify/probe_mcp.py --harnesses --project /path/to/your/lean/project     
 `install.ps1` and `install.sh` are thin launchers for the same Python installer, so
 the PowerShell and POSIX paths cannot drift apart.
 
-Idempotent: running it twice writes nothing the second time. Reversible:
-`--uninstall` restores every backup and deletes only what it created.
+Idempotent: running it twice writes nothing the second time — byte for byte, not
+just "no new files". Reversible: `--uninstall` restores every backup and deletes
+only what it created, and it leaves a file you edited afterwards in place.
 
 ## Harnesses
 
