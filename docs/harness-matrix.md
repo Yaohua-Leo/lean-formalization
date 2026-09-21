@@ -70,6 +70,7 @@ bypasses the tier gate — that is what it is for).
 | Harness | What is written | Evidence | Not verified |
 |---|---|---|---|
 | Mistral Vibe | `~/.vibe/config.toml`, one `[[mcp_servers]]` per server | lean-lsp-mcp README documents the shape, including the need to delete a bare `mcp_servers = []` first | nothing was run against Vibe; it is not installed on the authoring machine |
+| WorkBuddy AI | `~/.workbuddy-ai/MEMORY.md`, `~/.workbuddy-ai/skills`, `~/.workbuddy-ai/mcp.json` (`mcpServers`, same entry shape as the vscode row) | local inspection on the authoring machine (the three files exist; `product.json` does **not** live at `~/.workbuddy-ai/`), plus a stdio probe of the written server (21 tools, fallback disabled list) | the harness's own session/connector listing was not cross-checked; trust the newly written server in its connector UI |
 | any AGENTS.md-aware agent (Amp, Zed, Goose, Qwen Code, Crush, …) | `<project>/AGENTS.md`, `<project>/.agents/skills`, `~/.agents/skills` | the `.agents/skills` convention is documented by OpenCode V2 as a compatibility root | no universal MCP config path exists; use the agent's own `mcp add` or settings UI |
 
 ### Deliberately not shipped

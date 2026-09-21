@@ -53,6 +53,7 @@ Tier 1 = 配置路径在作者机器上核对过（本地检查 / 厂商文档 /
 | 1 | Cursor | `AGENTS.md`、`.cursor/rules/*.mdc` | `~/.cursor/skills`、`.cursor/skills` | `~/.cursor/mcp.json` |
 | 1 | VS Code / Copilot | `AGENTS.md`、`.github/copilot-instructions.md` | — | `.vscode/mcp.json` |
 | 2 | Mistral Vibe | — | — | `~/.vibe/config.toml` |
+| 2 | WorkBuddy AI | `~/.workbuddy-ai/MEMORY.md` | `~/.workbuddy-ai/skills` | `~/.workbuddy-ai/mcp.json` |
 | 2 | 任何读 AGENTS.md 的 agent | `AGENTS.md` | `.agents/skills` | 用该 agent 自带的 `mcp add` |
 
 本仓库**不**为 Windsurf、Cline、Aider、Amp、Zed、Goose 猜配置文件路径：写错路径等于写了一个

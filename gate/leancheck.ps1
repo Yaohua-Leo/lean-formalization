@@ -77,8 +77,37 @@ function Invoke-Step {
     param([string]$Name, [string]$Exe, [string[]]$Arguments)
     Write-Host "==> $Name"
     $started = Get-Date
-    $output = & $Exe @Arguments 2>&1
-    $code = $LASTEXITCODE
+    $output = @()
+    $code = 0
+    # With $ErrorActionPreference = 'Stop', a command that cannot be resolved
+    # raises a terminating CommandNotFoundException before anything is logged, and
+    # the run directory would stay empty while LATEST.md kept the previous PASS.
+    # A resolution failure is therefore recorded as a failed step (exit 127), and
+    # the script always reaches the report.
+    $resolved = $null
+    if ([System.IO.File]::Exists($Exe)) {
+        $resolved = $Exe
+    } else {
+        $cmd = Get-Command $Exe -ErrorAction SilentlyContinue
+        if ($cmd) { $resolved = $cmd.Source }
+    }
+    if (-not $resolved) {
+        $code = 127
+        $output = @(
+            "leancheck: cannot resolve '$Exe'.",
+            "Set lakeCommand (or lake) to an absolute path in lean-formalization.json, or repair PATH.",
+            "Nothing was executed for this step."
+        )
+    } else {
+        try {
+            $output = & $resolved @Arguments 2>&1
+            $code = $LASTEXITCODE
+            if ($null -eq $code) { $code = 0 }
+        } catch {
+            $code = 127
+            $output = @($_ | Out-String)
+        }
+    }
     $seconds = [int]((Get-Date) - $started).TotalSeconds
     $text = ($output | Out-String)
     Set-Content -LiteralPath (Join-Path $runDir "command-$Name.log") -Value $text -Encoding utf8

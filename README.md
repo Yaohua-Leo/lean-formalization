@@ -59,6 +59,7 @@ is in [`docs/harness-matrix.md`](docs/harness-matrix.md).
 | 1 | Cursor | `AGENTS.md`, `.cursor/rules/*.mdc` | `~/.cursor/skills`, `.cursor/skills` | `~/.cursor/mcp.json` |
 | 1 | VS Code / Copilot | `AGENTS.md`, `.github/copilot-instructions.md` | — | `.vscode/mcp.json` |
 | 2 | Mistral Vibe | — | — | `~/.vibe/config.toml` |
+| 2 | WorkBuddy AI | `~/.workbuddy-ai/MEMORY.md` | `~/.workbuddy-ai/skills` | `~/.workbuddy-ai/mcp.json` |
 | 2 | any AGENTS.md-aware agent | `AGENTS.md` | `.agents/skills` | use the agent's own `mcp add` |
 
 This repository does not include guessed config paths for Windsurf, Cline, Aider,

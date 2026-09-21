@@ -377,9 +377,13 @@
             "keyPath": [
               "mcp"
             ],
+            "staleKeyPath": [
+              "mcp",
+              "servers"
+            ],
             "entry": {
               "type": "local",
-              "command": "[command, ...args]",
+              "command": "{command_array}",
               "environment": "{env}",
               "enabled": true
             }
@@ -391,13 +395,13 @@
             ],
             "entry": {
               "type": "local",
-              "command": "[command, ...args]",
+              "command": "{command_array}",
               "environment": "{env}"
             }
           }
         },
         "defaultMajor": "2",
-        "entryNote": "OpenCode 1.x names servers directly under `mcp` and requires `enabled`; OpenCode 2.x uses `mcp.servers` and `disabled`. The installer probes `opencode --version` and writes the shape that version accepts; a config in the other shape is rejected outright by the other major (observed: 1.17.8 refuses mcp.servers with \"Configuration is invalid ... Missing key mcp.servers.enabled\"). command is an ARRAY and the env key is `environment` in both.",
+        "entryNote": "OpenCode 1.x names servers directly under `mcp` and requires `enabled`; OpenCode 2.x uses `mcp.servers` and `disabled`. The installer probes `opencode --version` and renders the template that version accepts; a config in the other shape is rejected outright by the other major (observed: 1.17.8 refuses mcp.servers with \"Configuration is invalid ... Missing key mcp.servers.enabled\"). `command` is an ARRAY ({command_array} renders the whole command) and the env key is `environment` in both. Writing the 1.x shape also removes OUR entries from the shape's `staleKeyPath` (mcp.servers), leaving servers the user added there.",
         "nativeCli": [
           "opencode",
           "mcp",
@@ -584,6 +588,54 @@
         "sourceFiles": [
           "code --help (observed: --add-mcp <json> adds an MCP server definition)",
           "https://pypi.org/project/lean-lsp-mcp/ (workspace mcp.json {\"servers\": ...} shape)"
+        ]
+      }
+    },
+    "workbuddy": {
+      "displayName": "WorkBuddy AI",
+      "tier": 2,
+      "detect": {
+        "paths": [
+          "~/.workbuddy-ai"
+        ]
+      },
+      "instructions": [
+        {
+          "scope": "user",
+          "path": "~/.workbuddy-ai/MEMORY.md"
+        }
+      ],
+      "skillRoots": [
+        {
+          "scope": "user",
+          "path": "~/.workbuddy-ai/skills"
+        }
+      ],
+      "mcp": {
+        "method": "file-json",
+        "targets": [
+          {
+            "scope": "user",
+            "path": "~/.workbuddy-ai/mcp.json"
+          }
+        ],
+        "keyPath": [
+          "mcpServers"
+        ],
+        "entry": {
+          "type": "stdio",
+          "command": "{command}",
+          "args": "{args}",
+          "env": "{env}"
+        },
+        "entryNote": "Byte-compatible with the vscode row; only the key path differs."
+      },
+      "reload": "Start a NEW session. A newly written MCP server must be trusted explicitly in the connector UI before its tools activate; a session started before the install will not pick it up.",
+      "verified": {
+        "paths": "local-inspection",
+        "sourceFiles": [
+          "~/.workbuddy-ai observed on the authoring machine: MEMORY.md, skills/, mcp.json ({mcpServers: {<name>: {type, command, args, env}}}); a hand-written lean-lsp entry probed 21 tools with lean_build/lean_run_code absent",
+          "note: product.json does not exist at ~/.workbuddy-ai/product.json; dataFolderName (.workbuddy-ai) was observed in the app installation, not at this path"
         ]
       }
     },

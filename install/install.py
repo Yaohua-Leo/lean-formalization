@@ -420,12 +420,12 @@ class Installer:
                             "(docs/harness-matrix.md has the exact snippet)" % (hid, path)
                         )
                         continue
+                    key_path, template, cleanup = self.json_shape(hid, mcp)
                     for server_id in self.mcp_servers_to_mount():
-                        key_path, entry, cleanup = self.json_shape(hid, server_id, mcp)
                         self.actions.append({
                             "kind": "json_entry", "path": path, "scope": target["scope"],
                             "key_path": key_path, "name": server_id,
-                            "entry": entry, "cleanup": cleanup,
+                            "entry": self.render_entry(template, server_id), "cleanup": cleanup,
                             "label": "%s: mcp server %s -> %s" % (hid, server_id, path),
                         })
                 else:
@@ -451,12 +451,18 @@ class Installer:
                                 "label": "%s: mcp server %s -> %s" % (hid, server_id, path),
                             })
 
-    def json_shape(self, hid: str, server_id: str, mcp: dict) -> tuple[list[str], dict, list[str] | None]:
-        """Key path, entry object and any stale key path to clean up, for this harness."""
-        if hid == "opencode" and "shapeByMajor" in mcp:
+    def json_shape(self, hid: str, mcp: dict) -> tuple[list[str], dict, list[str] | None]:
+        """Key path, entry template and stale key path — read from the table.
+
+        A flat row carries `keyPath` + `entry`; a row with `shapeByMajor` carries
+        one template per major version, and the installed version selects it. The
+        template may also name a `staleKeyPath` whose OUR-only entries are removed
+        when that shape is written (OpenCode 1.x rejects `mcp.servers` outright).
+        """
+        if "shapeByMajor" in mcp:
             shapes = mcp["shapeByMajor"]
             default = str(mcp.get("defaultMajor", "2"))
-            if self.opencode_major is None:
+            if "versionProbe" in mcp and self.opencode_major is None:
                 note = ("opencode: could not read `opencode --version`; wrote the %s.x shape. "
                         "If `opencode mcp list` says 'Configuration is invalid', re-run with "
                         "--opencode-major 1 (or 2)." % default)
@@ -464,38 +470,18 @@ class Installer:
                     self.warnings.append(note)
             major = self.opencode_major if self.opencode_major in shapes else default
             shape = shapes[major]
-            cleanup = None
-            if major == "1":
-                # A 1.x install rejects `mcp.servers` outright, so an entry we wrote
-                # there with the 2.x shape must go, or the whole file stays invalid.
-                cleanup = ["mcp", "servers"]
-            return list(shape["keyPath"]), self.json_entry(hid, server_id, major), cleanup
-        return list(mcp["keyPath"]), self.json_entry(hid, server_id), None
+            return list(shape["keyPath"]), shape["entry"], shape.get("staleKeyPath")
+        if "entry" in mcp:
+            return list(mcp["keyPath"]), mcp["entry"], mcp.get("staleKeyPath")
+        raise SystemExit(
+            "harness %s: file-json needs an `entry` template (or `shapeByMajor`) in harnesses.json" % hid)
 
-    def json_entry(self, hid: str, server_id: str, major: str | None = None) -> dict:
-        if hid == "opencode":
-            entry = {
-                "type": "local",
-                "command": self.mcp_command(server_id),
-                "environment": self.mcp_env(server_id),
-            }
-            if major == "1":
-                entry["enabled"] = True
-            return entry
-        if hid in ("cursor", "gemini-cli", "claude-code"):
-            return {
-                "command": self.mcp_command(server_id)[0],
-                "args": self.mcp_command(server_id)[1:],
-                "env": self.mcp_env(server_id),
-            }
-        if hid == "vscode":
-            return {
-                "type": "stdio",
-                "command": self.mcp_command(server_id)[0],
-                "args": self.mcp_command(server_id)[1:],
-                "env": self.mcp_env(server_id),
-            }
-        raise SystemExit("no JSON entry shape for harness %s" % hid)
+    def render_entry(self, template, server_id: str):
+        if isinstance(template, dict):
+            return {key: self.render_entry(value, server_id) for key, value in template.items()}
+        if isinstance(template, list):
+            return [self.render_entry(item, server_id) for item in template]
+        return self.placeholder_value(template, server_id)
 
     def toml_fields(self, hid: str, server_id: str) -> dict:
         """Entry fields for a TOML harness, read from its `fields` template."""
@@ -512,6 +498,8 @@ class Installer:
             return self.mcp_command(server_id)[0]
         if value == "{args}":
             return self.mcp_command(server_id)[1:]
+        if value == "{command_array}":
+            return self.mcp_command(server_id)
         if value == "{env}":
             return self.mcp_env(server_id)
         return value

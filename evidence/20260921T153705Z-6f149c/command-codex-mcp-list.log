@@ -1,0 +1,4 @@
+$ cmd /c C:\Users\Leo\AppData\Roaming\npm\codex.CMD mcp list
+
+Name      Command  Args          Env                                                  Cwd  Status   Auth       
+lean-lsp  uvx      lean-lsp-mcp  LEAN_LOG_LEVEL=*****, LEAN_MCP_DISABLED_TOOLS=*****  -    enabled  Unsupported

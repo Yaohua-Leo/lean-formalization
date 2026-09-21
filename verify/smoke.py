@@ -50,17 +50,27 @@ class Checker:
         return sum(1 for r in self.results if not r["ok"])
 
 
-def child_env() -> dict:
+def child_env(home: Path | None = None) -> dict:
+    """Environment for installer children.
+
+    With `home`, the DSH variables are pinned to the fixture: whether the DSH row
+    is detected must be decided by the fixture, not by whoever happens to run the
+    test (the authoring machine exports DSH_HOME globally, which once made this
+    suite pass while a clean shell failed two checks).
+    """
     env = dict(os.environ)
     env.setdefault("PYTHONIOENCODING", "utf-8")
+    if home is not None:
+        env["DSH_HOME"] = str(home / "dsh-home")
+        env["DSH_AGENTS_HOME"] = str(home / ".agents")
     return env
 
 
-def run_installer(*args: str, cwd: Path | None = None) -> subprocess.CompletedProcess:
+def run_installer(*args: str, cwd: Path | None = None, home: Path | None = None) -> subprocess.CompletedProcess:
     return subprocess.run(
         [sys.executable, str(REPO / "install" / "install.py"), *args],
         cwd=str(cwd or REPO), capture_output=True, text=True,
-        encoding="utf-8", errors="replace", env=child_env(),
+        encoding="utf-8", errors="replace", env=child_env(home),
     )
 
 
@@ -101,6 +111,9 @@ def main(argv: list[str] | None = None) -> int:
     work.mkdir(parents=True)
     home = work / "home"
     home.mkdir()
+    # The DSH detect rule is `env: DSH_HOME` or `paths: ~/.dsh`; the fixture must
+    # satisfy it itself (child_env pins the env, this satisfies the path).
+    (home / ".dsh").mkdir()
     project = make_fixture(work)
     checker = Checker()
 
@@ -108,7 +121,7 @@ def main(argv: list[str] | None = None) -> int:
               "--dsh-home", str(home / "dsh-home"), "--agents-home", str(home / ".agents")]
 
     # ── 1. install ──────────────────────────────────────────────────────────
-    first = run_installer(*common, "--scope", "both")
+    first = run_installer(*common, "--scope", "both", home=home)
     checker.check("install exits 0", first.returncode == 0, first.stdout.strip().splitlines()[-1] if first.stdout else "")
 
     expected_files = [
@@ -217,7 +230,7 @@ def main(argv: list[str] | None = None) -> int:
     manifests = [project / ".lean-formalization" / "manifest.json",
                  home / ".lean-formalization" / "manifest.json"]
     before = {p: (p.read_bytes() if p.is_file() else None) for p in manifests}
-    second = run_installer(*common, "--scope", "both")
+    second = run_installer(*common, "--scope", "both", home=home)
     writes = [l for l in second.stdout.splitlines() if l.startswith("    +") or l.startswith("    ~")]
     checker.check("second install writes nothing", second.returncode == 0 and not writes,
                   "; ".join(writes[:3]))
@@ -232,7 +245,7 @@ def main(argv: list[str] | None = None) -> int:
     edited = project / "CLAUDE.md"
     edited.write_text(edited.read_text(encoding="utf-8") + "\nmy own addition\n", encoding="utf-8")
 
-    uninstall = run_installer("--project", str(project), "--home", str(home), "--uninstall")
+    uninstall = run_installer("--project", str(project), "--home", str(home), "--uninstall", home=home)
     leftover = [str(p.relative_to(work)) for p in
                 [project / ".mcp.json", project / "LeanAudit.lean",
                  project / ".github" / "copilot-instructions.md",
@@ -252,7 +265,7 @@ def main(argv: list[str] | None = None) -> int:
 
     # ── 4. optionally: the scaffolded gate really runs ──────────────────────
     if args.with_gate:
-        gate = run_installer(*common, "--scope", "project")
+        gate = run_installer(*common, "--scope", "project", home=home)
         if gate.returncode != 0:
             checker.check("re-install for the gate check", False, gate.stderr.strip()[:200])
         else:
@@ -282,6 +295,28 @@ def main(argv: list[str] | None = None) -> int:
             )
             checker.check("gate fails a whitelist violation (exit 1)", strict.returncode == 1,
                           " ".join(strict.stdout.strip().splitlines()[-1:]))
+
+            # A step whose command cannot be resolved used to terminate the gate
+            # before any evidence was written, leaving an empty run directory and a
+            # stale LATEST.md. The gate must still produce a full failure record.
+            nolake = json.loads(cfg_path.read_text(encoding="utf-8"))
+            nolake["lakeCommand"] = "definitely-not-a-real-command"
+            cfg_path.write_text(json.dumps(nolake, indent=2) + "\n", encoding="utf-8")
+            unres = subprocess.run(
+                ["pwsh", "-NoProfile", "-File", str(project / "scripts" / "leancheck.ps1"), "-NoBuild"],
+                cwd=str(project), capture_output=True, text=True,
+                encoding="utf-8", errors="replace", env=child_env(home),
+            )
+            runs = sorted((project / "evidence" / "lean" / "runs").glob("*"), key=lambda p: p.name)
+            newest = runs[-1] if runs else None
+            evidence_ok = bool(newest) and (newest / "command-axiom-audit.log").is_file() \
+                and (newest / "report.json").is_file()
+            if evidence_ok:
+                record = json.loads((newest / "report.json").read_text(encoding="utf-8"))
+                evidence_ok = record.get("ok") is False
+            checker.check("gate with an unresolvable command still writes evidence",
+                          unres.returncode == 1 and evidence_ok,
+                          "exit %d, newest run %s" % (unres.returncode, newest.name if newest else "none"))
 
     if args.json:
         print(json.dumps({"work": str(work), "results": checker.results,

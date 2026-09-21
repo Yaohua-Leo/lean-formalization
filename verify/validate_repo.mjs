@@ -129,10 +129,13 @@ for (const [id, h] of Object.entries(spec.harnesses ?? {})) {
   if (mcp.method === 'file-json') {
     check(Boolean(mcp.entry) || Boolean(mcp.shapeByMajor), `${id}: file-json without an entry template`)
     check(Array.isArray(mcp.keyPath) || Boolean(mcp.shapeByMajor), `${id}: file-json without a keyPath`)
+    const rendered = JSON.stringify(mcp.entry ?? mcp.shapeByMajor ?? '')
+    check(rendered.includes('{command'), `${id}: json entry template does not reference {command}`)
   }
   if (mcp.method === 'file-toml') {
     check(Boolean(mcp.fields), `${id}: file-toml without a fields template`)
     check(Boolean(mcp.table) || Boolean(mcp.arrayOfTables), `${id}: file-toml without a table name`)
+    check(JSON.stringify(mcp.fields).includes('{command'), `${id}: toml fields template does not reference {command}`)
   }
 }
 check(spec.skills.beam.commit.length === 40, 'harnesses.json: beam commit is not a full sha')

@@ -101,6 +101,17 @@ dependency checkouts and do **not** edit the global git config. The scaffolded
 It needs `ripgrep` (`rg`) on PATH. Every other tool still works. The installer
 reports `rg=missing` rather than installing a system package for you.
 
+**`leancheck.ps1` prints a "cannot recognize … as a command" error wall**
+`lakeCommand` (or `lake`) cannot be resolved — `lake` is not on `PATH`, the
+toolchain moved, or `PATHEXT` is degraded in a restricted shell. The gate records
+this as a failed step: the run directory contains `command-build.log` (exit 127
+with the resolution message) and `report.json` with `ok: false`, and `LATEST.md`
+flips to FAIL. The fix on your side is one line: set `lakeCommand` in
+`lean-formalization.json` to an absolute path (for example
+`C:/Users/<you>/.elan/bin/lake.exe`). Checkouts older than the evidence-integrity
+fix left an empty run directory and a stale `LATEST.md` — enumerate `runs/` if you
+suspect that.
+
 **`LeanAudit: no targets given; refusing to report an empty audit as success` (exit 2)**
 `lean-formalization.json` still has `"targets": []`. Fill it with the declarations
 you want audited — the gate deliberately will not turn "nothing to check" into a

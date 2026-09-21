@@ -1,0 +1,5 @@
+$ C:\Python314\python.exe verify/probe_mcp.py --command uvx lean-lsp-mcp --env LEAN_LOG_LEVEL=NONE --env LEAN_MCP_DISABLED_TOOLS=lean_build,lean_run_code --env UV_CACHE_DIR=D:\新建文件夹\lean-formalization\.uv-probe\cache --env UV_TOOL_DIR=D:\新建文件夹\lean-formalization\.uv-probe\tools --expect lean_goal --expect lean_diagnostic_messages --expect lean_local_search --forbid lean_build --forbid lean_run_code --timeout 300
+
+cli        OK   21    Lean LSP
+
+cli: 21 tools (lean_file_outline, lean_diagnostic_messages, lean_code_actions, lean_goal, lean_term_goal, lean_hover_info, lean_completions, lean_declaration_file, ...)

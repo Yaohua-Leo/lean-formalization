@@ -29,7 +29,7 @@ The summary at the time of publication:
 |---|---|
 | `node verify/validate_repo.mjs` | see `evidence/…/report.json` (tamper controls: editing a vendored skill **or** `licenses/lean-beam-LICENSE` now fails it) |
 | `python verify/check_gate_shell.py` | both embedded Python blocks parse; the config reader emits the assignments the shell consumes; the whitelist check accepts a whitelisted target, rejects an out-of-whitelist axiom and a never-reported target, and writes `LATEST.md` |
-| `python verify/smoke.py --with-gate` | see `evidence/…/report.json` — **18 checks, 0 failed** in the delivered run (2e9e8d), incl. the OpenCode shape assertion, byte-level idempotence, the rendered DSH preset's contract and mode rows, a real Lean build, and a whitelist pass/fail pair |
+| `python verify/smoke.py --with-gate` | see `evidence/…/report.json` — **19 checks, 0 failed** in the delivered run (6f149c), incl. the OpenCode shape assertion, byte-level idempotence, the rendered DSH preset's contract and mode rows, the unresolvable-command evidence check, a real Lean build, and a whitelist pass/fail pair |
 | `python verify/probe_mcp.py --command "uvx lean-lsp-mcp" …` | 21 tools, expected names present, `lean_build`/`lean_run_code` absent |
 | `claude mcp list` in the installed fixture | reported `lean-lsp: uvx lean-lsp-mcp` (pending approval) — the harness read the file |
 | `CODEX_HOME=<tmp> codex mcp list` | `lean-lsp` row, status `enabled` — the harness read the file |
@@ -94,6 +94,19 @@ commit that carries this file:
 | the independent provenance re-check had no `command-*.log` | promoted to a required ladder step: `verify/provenance_recheck.py` |
 | `BOOTSTRAP.md` still pointed the DSH preset at `$DSH_HOME` unconditionally | notes the `--home` derivation |
 | `AGENTS.md` overstated what the validator enforces | reworded: ledger rows + template presence are enforced; prose paths in `docs/` are not |
+
+## Issue triage (2026-09-21) — three repository issues, reproduced before fixing
+
+| Issue | Verdict | Evidence | Fix |
+|---|---|---|---|
+| #1 `lakeCommand` unresolvable → empty run dir, no report, stale `LATEST.md` | **real** (reproduced: exit 1, run dir with 0 files, no `LATEST.md`) | `Invoke-Step` now pre-checks resolution, records exit 127 with the resolution message as `command-<step>.log`, and the script always reaches `report.json` (`ok: false`) and a FAIL `LATEST.md`; exit code 1 unchanged | `gate/leancheck.ps1`; regression check in `smoke.py --with-gate`; troubleshooting entry |
+| #2 `smoke.py` DSH checks depend on the caller's `DSH_HOME` | **real** (reproduced: without `DSH_HOME` → `17 checks, 2 failed`; with → `18/0`) | `smoke.py` now pins `DSH_HOME`/`DSH_AGENTS_HOME` to the fixture home in `child_env()` and creates `<home>/.dsh` so the fixture satisfies its own detect rule | `verify/smoke.py`; verified with and without `DSH_HOME` in the caller env (18/0 both) |
+| #3 add a WorkBuddy AI harness row (tier 2) | **valid feature request**; surfaces confirmed locally (`MEMORY.md`, `skills/`, `mcp.json` with `{mcpServers: {name: {type, command, args, env}}}`); one provenance detail corrected (`product.json` does not live under `~/.workbuddy-ai/`) | proposed row adopted almost verbatim; the crash it predicted (`json_entry` → `SystemExit`) was real and is fixed structurally | `harnesses.json` workbuddy row; `json_shape`/`render_entry` are now table-driven (`entry`/`shapeByMajor` templates, `{command_array}` placeholder, `staleKeyPath` in the table) so a new file-json row no longer needs a code change; validator asserts every JSON template references `{command}` |
+
+Also fixed while triaging #3: the earlier "dead data" criticism is half-resolved by the
+same change — `entry`, `fields`, `arrayOfTables`, `shapeByMajor` and `staleKeyPath`
+are now live data consumed by the installer; `entryNote`, `nativeCli`, `reload`,
+`docUrl` and `verified` remain documentation by design.
 
 Not run, and therefore `unknown`:
 
