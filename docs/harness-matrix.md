@@ -54,8 +54,10 @@ was never touched; `verify/acceptance.py` re-runs them.
 | `XDG_CONFIG_HOME=<tmp>/.config … opencode mcp list` | `1 server(s)`, `lean-lsp — uvx lean-lsp-mcp`; its health check reports `EPERM: uv_spawn 'uvx'` because that sandboxed process may not spawn `uvx` (the same server starts fine when probed directly) |
 | `python verify/probe_mcp.py --command "uvx lean-lsp-mcp" …` | 21 tools, `lean_goal`/`lean_diagnostic_messages`/`lean_local_search` present, `lean_build`/`lean_run_code` absent |
 
-**Not run** (so the row stays "files written" above): Gemini CLI's `mcp` subcommand
-hung for 180 s in a non-interactive shell on the authoring machine; Cursor and
+**Not run** (so the row stays "files written" above): Gemini CLI refuses to list
+anything from an unauthenticated profile (`Please set an Auth method in … or
+specify GEMINI_API_KEY …` — it read the scratch home's path and stopped there), and
+authenticating an agent's account is not something an installer should do; Cursor and
 VS Code are GUIs and were not restarted; DSH needs a new session, which only the
 user can start (`--doctor` can then report what it sees).
 

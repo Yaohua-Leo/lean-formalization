@@ -68,8 +68,11 @@ Not run, and therefore `unknown`:
 
 - any run against Windsurf, Cline, Aider, Amp, Zed, Goose, Vibe (not installed on
   the authoring machine);
-- Gemini CLI's own `mcp` listing (the subcommand hung in a non-interactive shell);
-  the written `settings.json` is only checked for JSON validity;
+- Gemini CLI's own listing: with `HOME`/`USERPROFILE` pointed at a scratch install
+  the CLI read that path and then refused to continue without credentials
+  (`Please set an Auth method in … or specify GEMINI_API_KEY …`). Authenticating a
+  user's account is not the installer's job, so the written `settings.json` is only
+  checked for JSON validity;
 - Cursor and VS Code were not restarted, and DSH was not given a new session, so no
   harness-level confirmation exists for those three;
 - `gate/leancheck.sh` — Git Bash cannot start in the authoring environment

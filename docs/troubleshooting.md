@@ -67,10 +67,11 @@ usually matters only for probes run from inside an agent's shell.)
    **"Pending approval"** — run `claude` once and approve it; this is Claude Code's
    own security gate, not a failed install.
 
-**`gemini mcp …` hangs**
-Observed on the authoring machine: the subcommand hung for 180 s in a
-non-interactive shell. The installer writes `~/.gemini/settings.json` directly
-instead. Verify with the stdio probe.
+**`gemini mcp list` asks for an Auth method instead of listing servers**
+Expected: Gemini CLI will not list anything from an unauthenticated profile
+(`Please set an Auth method in … or specify GEMINI_API_KEY …`). That is not a
+configuration failure — the installer's job ends at writing `settings.json`; sign
+in normally and start a new session.
 
 **Beam mode was not selected even though Beam is installed**
 The detection probes, in order: `lean-beam-mcp` on PATH, `~/.local/bin/lean-beam-mcp`,
