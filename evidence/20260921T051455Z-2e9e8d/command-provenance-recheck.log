@@ -1,0 +1,11 @@
+$ C:\Python314\python.exe verify/provenance_recheck.py
+
+  OK   skills/lean-beam/SKILL.md
+  OK   skills/lean-beam/agents/openai.yaml
+  OK   skills/lean-beam/references/anti-patterns.md
+  OK   skills/lean-beam/references/commit-speculative.md
+  OK   skills/lean-beam/references/lean-run-at-semantics.md
+  OK   skills/lean-beam/references/mcts-search.md
+  OK   skills/lean-beam/references/workflow-details.md
+  OK   licenses/lean-beam-LICENSE
+  ledger rows: 8, mismatches: 0

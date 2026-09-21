@@ -29,12 +29,12 @@ The summary at the time of publication:
 |---|---|
 | `node verify/validate_repo.mjs` | see `evidence/…/report.json` (tamper controls: editing a vendored skill **or** `licenses/lean-beam-LICENSE` now fails it) |
 | `python verify/check_gate_shell.py` | both embedded Python blocks parse; the config reader emits the assignments the shell consumes; the whitelist check accepts a whitelisted target, rejects an out-of-whitelist axiom and a never-reported target, and writes `LATEST.md` |
-| `python verify/smoke.py --with-gate` | see `evidence/…/report.json` (13 checks incl. the OpenCode shape assertion and byte-level idempotence, plus a real Lean build and a whitelist pass/fail pair) |
+| `python verify/smoke.py --with-gate` | see `evidence/…/report.json` — **16 checks, 0 failed** in the delivered run, incl. the OpenCode shape assertion, byte-level idempotence, the rendered DSH preset's contract and mode rows, a real Lean build, and a whitelist pass/fail pair |
 | `python verify/probe_mcp.py --command "uvx lean-lsp-mcp" …` | 21 tools, expected names present, `lean_build`/`lean_run_code` absent |
 | `claude mcp list` in the installed fixture | reported `lean-lsp: uvx lean-lsp-mcp` (pending approval) — the harness read the file |
 | `CODEX_HOME=<tmp> codex mcp list` | `lean-lsp` row, status `enabled` — the harness read the file |
-| `XDG_*=<tmp> opencode mcp list` | `1 server(s)`, `lean-lsp` — the harness read the file (its health check is refused permission to spawn `uvx`/`git` inside the sandbox, which is not a config failure) |
-| independent hash re-check of `skills/PROVENANCE.md` (second implementation, not the validator) | 8/8 files match |
+| `XDG_*=<tmp> opencode mcp list` | `✓ lean-lsp connected` — the harness read the file (delivered log; earlier runs inside a sandbox saw OpenCode refused permission to spawn `git`/`uvx`, which is why the step runs from a temp directory outside git) |
+| `python verify/provenance_recheck.py` | a second, independent implementation of the vendored-hash check: 8/8 ledger rows recomputed and matching |
 | `python install/install.py --doctor` | see `evidence/…/report.json` |
 | Jordan project dry run | plan inspected, no write performed |
 
@@ -63,6 +63,37 @@ commits. Residual unknowns it listed that this work does **not** resolve: no DSH
 session was started, `lean-beam-mcp` is not installed here so Beam was never probed
 end to end, `gemini mcp` / `code --add-mcp` / `vibe` were never run, and the shell
 wrapper of `leancheck.sh` still needs a real bash to exercise.
+
+## Second independent review — `ac8b51d` (the delivered version)
+
+A second reviewer worked from a frozen `git archive` export of `ac8b51d` and
+re-ran everything itself (installs into throwaway homes, a real Lean build, the
+std.io probe, its own heredoc extractor and tamper controls). Verdicts:
+
+- **All eight fix claims: `fixed`** — gate heredocs parse and behave; Vibe writes
+  two `[[mcp_servers]]` blocks with no duplicates across three runs; manifests and
+  a 126-file recursive hash snapshot are byte-identical across runs; the printed
+  next step is `--harnesses`; `--harnesses --env` genuinely applies the overrides
+  (uv visibly populated the scratch cache); license and skill tamper controls both
+  exit 1; an explicit `--home` keeps a scratch run out of the real DSH home; a
+  missing `fields` template fails the validator.
+- **Sanity reruns: all exit 0** — `validate_repo.mjs`, `smoke.py --with-gate`
+  (16 checks, real Lean build, gate exit 2/0/1 trio), `--doctor`.
+
+Its nine residual findings were documentation-level; each is addressed in the
+commit that carries this file:
+
+| Finding (ac8b51d) | Resolution |
+|---|---|
+| `acceptance.md` said "13 checks"; the delivered log says 16 | corrected |
+| OpenCode health check described as `EPERM uv_spawn`; the delivered log shows `✓ lean-lsp connected` (the old EPERM was a `chdir`, from a different run) | corrected in matrix + acceptance, with the log named |
+| "a second run writes nothing, byte for byte" did not hold for the tier-2 Vibe path (file rewritten per server, a new backup stamp per run) | array-of-tables is now planned as ONE action: three consecutive runs leave `config.toml` byte-identical with zero backup stamps |
+| "tier-2 is written only with `--include-unverified`" ignored the `--harnesses` force path | wording corrected in both READMEs and the matrix |
+| matrix listed `~/.claude/skills` as an OpenCode install root, against `harnesses.json` | reworded: upstream compat root, deliberately not written (the claude-code row covers it) |
+| the DSH preset "parses (19/20 rows)" claim had no committed log | `smoke.py` now asserts the rendering (contract + mode rows) in the committed ladder; the js-yaml parse is attributed as a manual authoring-machine check |
+| the independent provenance re-check had no `command-*.log` | promoted to a required ladder step: `verify/provenance_recheck.py` |
+| `BOOTSTRAP.md` still pointed the DSH preset at `$DSH_HOME` unconditionally | notes the `--home` derivation |
+| `AGENTS.md` overstated what the validator enforces | reworded: ledger rows + template presence are enforced; prose paths in `docs/` are not |
 
 Not run, and therefore `unknown`:
 

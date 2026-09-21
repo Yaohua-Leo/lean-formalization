@@ -1,0 +1,48 @@
+$ C:\Python314\python.exe install/install.py --project D:\the_bible_of_Jordan --home D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\dryrun-home --scope both --dry-run
+
+lean-formalization installer
+repo            : D:\新建文件夹\lean-formalization
+home            : D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\dryrun-home
+agents home     : D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\dryrun-home\.agents
+dsh home        : D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\dryrun-home\.dsh
+scope           : both
+dry run         : True
+
+[user scope]
+    + dsh: skill lean-formalization -> D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\dryrun-home\.agents\skills\lean-formalization
+    + dsh: skill lean-beam -> D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\dryrun-home\.agents\skills\lean-beam
+    + dsh: skill lean-formalization -> D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\dryrun-home\.dsh\skills\lean-formalization
+    + dsh: skill lean-beam -> D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\dryrun-home\.dsh\skills\lean-beam
+    + claude-code: contract block -> D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\dryrun-home\.claude\CLAUDE.md
+    + claude-code: skill lean-formalization -> D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\dryrun-home\.claude\skills\lean-formalization
+    + claude-code: skill lean-beam -> D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\dryrun-home\.claude\skills\lean-beam
+    + codex: contract block -> D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\dryrun-home\.codex\AGENTS.md
+    + codex: skill lean-formalization -> D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\dryrun-home\.codex\skills\lean-formalization
+    + codex: skill lean-beam -> D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\dryrun-home\.codex\skills\lean-beam
+    + codex: mcp server lean-beam -> D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\dryrun-home\.codex\config.toml
+    + codex: mcp server lean-lsp -> D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\dryrun-home\.codex\config.toml
+    + opencode: contract block -> D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\dryrun-home\.config\opencode\AGENTS.md
+    + opencode: skill lean-formalization -> D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\dryrun-home\.config\opencode\skills\lean-formalization
+    + opencode: skill lean-beam -> D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\dryrun-home\.config\opencode\skills\lean-beam
+    + opencode: mcp server lean-beam -> D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\dryrun-home\.config\opencode\opencode.json
+    + opencode: mcp server lean-lsp -> D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\dryrun-home\.config\opencode\opencode.json
+    + gemini-cli: contract block -> D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\dryrun-home\.gemini\GEMINI.md
+    + gemini-cli: skill lean-formalization -> D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\dryrun-home\.gemini\skills\lean-formalization
+    + gemini-cli: skill lean-beam -> D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\dryrun-home\.gemini\skills\lean-beam
+    + gemini-cli: mcp server lean-beam -> D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\dryrun-home\.gemini\settings.json
+    + gemini-cli: mcp server lean-lsp -> D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\dryrun-home\.gemini\settings.json
+    + cursor: skill lean-formalization -> D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\dryrun-home\.cursor\skills\lean-formalization
+    + cursor: skill lean-beam -> D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\dryrun-home\.cursor\skills\lean-beam
+    + cursor: mcp server lean-beam -> D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\dryrun-home\.cursor\mcp.json
+    + cursor: mcp server lean-lsp -> D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\dryrun-home\.cursor\mcp.json
+    + dsh: preset.yml -> D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\dryrun-home\.dsh\.agent-presets\lean\preset.yml
+    + dsh: agent.cordis.yml -> D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\dryrun-home\.dsh\.agent-presets\lean\agent.cordis.yml
+
+mode            : beam (Beam at D:\the_bible_of_Jordan\tools\beam-mcp.ps1)
+project         : D:\the_bible_of_Jordan  (not a Lean project: user scope only)
+harnesses       : dsh, claude-code, codex, opencode, gemini-cli, cursor, vscode
+prereqs         : uvx=ok, rg=missing (lean_local_search and lean_verify source scanning need ripgrep on PATH)
+
+note    : project scope skipped: D:\the_bible_of_Jordan is not a Lean project (no lean-toolchain)
+
+dry run: nothing was written. Re-run without --dry-run to apply.

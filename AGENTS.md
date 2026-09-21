@@ -16,10 +16,11 @@ the fetch ladder, the detection rules, what may be written, and how to verify.
   paths, scopes, the MCP method, the mode-dependent disabled-tool lists, and the
   TOML `fields` templates. Entry *shapes* for the JSON harnesses are still rendered
   by `install/install.py` (`json_shape`), because they carry per-harness structure
-  (`.mcp.json` vs `servers` vs Vibe's array of tables); `verify/validate_repo.mjs`
-  fails if a harness that needs a template has none, and if a documented path stops
-  matching. Do not add a new per-harness special case without a matching table row
-  and a validator check.
+  (`.mcp.json` vs `servers` vs Vibe's array of tables). `verify/validate_repo.mjs`
+  enforces the parts that can be checked mechanically: every provenance ledger row,
+  and the presence of a template (`entry`/`shapeByMajor`/`fields`) for every
+  harness whose method needs one. It does not cross-check prose paths in `docs/` —
+  keep those in sync by hand.
 - `contract.md` is the single source of truth for the always-on rules. The DSH
   persona prefix, the injected instruction block and the docs are all derived from
   it; if you change a rule, change it there and re-run the validators.

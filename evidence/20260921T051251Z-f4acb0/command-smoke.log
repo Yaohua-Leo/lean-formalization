@@ -1,0 +1,23 @@
+$ C:\Python314\python.exe verify/smoke.py --with-gate --work D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\smoke
+
+PASS install exits 0  — uninstall: python install/install.py --uninstall
+PASS every expected file exists
+PASS contract block present exactly once
+PASS user prose outside the block survives
+PASS contract carries the non-negotiables
+PASS every config file still parses
+PASS opencode config shape matches the installed major (1)  — {"lean-lsp": {"type": "local", "command": ["uvx", "lean-lsp-mcp"], "environment": {"LEAN_LOG_LEVEL": "NONE", "LEAN_MCP_D
+PASS rendered DSH preset carries the contract
+FAIL rendered DSH preset mounts exactly the lsp-fallback rows
+PASS second install writes nothing
+PASS second install leaves every file byte-identical
+PASS uninstall removes what it created
+PASS uninstall restores a pre-existing file without the block
+PASS uninstall leaves the project config alone
+PASS a file the user edited is left in place, not deleted
+PASS gate refuses an empty target list (exit 2)  — leancheck: config lists no targets; refusing to report an empty audit as success
+PASS gate passes a whitelisted project (exit 0)  — leancheck: PASS
+PASS gate fails a whitelist violation (exit 1)  —  - FixtureProj.uses_classical depends on axioms outside the whitelist: propext, Classical.choice, Quot.sound
+
+smoke: 18 checks, 1 failed
+scratch tree left at D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\smoke

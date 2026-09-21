@@ -187,6 +187,32 @@ def main(argv: list[str] | None = None) -> int:
         checker.check("opencode config shape matches the installed major (%s)" % (major or "undetected"),
                       good, json.dumps(mcp)[:120])
 
+    # The rendered DSH preset must carry the contract and exactly the MCP rows the
+    # chosen mode implies (structural assertions; a full YAML parse needs a YAML
+    # library, which smoke deliberately does not require).
+    preset = home / "dsh-home" / ".agent-presets" / "lean" / "agent.cordis.yml"
+    if preset.is_file():
+        body = preset.read_text(encoding="utf-8")
+        checker.check(
+            "rendered DSH preset carries the contract",
+            "Lean 4 formalization assistant" in body and "Non-negotiables" in body,
+        )
+        beam_on_path = shutil.which("lean-beam-mcp") is not None
+        beam_launcher = (project / "tools" / "beam-mcp.ps1").is_file()
+        if beam_on_path or beam_launcher:
+            good = ("mcp-lean-beam" in body and "mcp-lean-lsp" in body
+                    and "lean_goal" in body and "lean_get_widget_source" in body)
+        else:
+            # The YAML renderer quotes values, so match the key and the value
+            # separately instead of one unquoted string.
+            good = ("mcp-lean-lsp" in body and "mcp-lean-beam" not in body
+                    and "LEAN_MCP_DISABLED_TOOLS" in body
+                    and "lean_build,lean_run_code" in body)
+        checker.check("rendered DSH preset mounts exactly the %s rows"
+                      % ("beam" if (beam_on_path or beam_launcher) else "lsp-fallback"), good)
+    else:
+        checker.check("rendered DSH preset exists", False, str(preset))
+
     # ── 2. idempotence ──────────────────────────────────────────────────────
     manifests = [project / ".lean-formalization" / "manifest.json",
                  home / ".lean-formalization" / "manifest.json"]

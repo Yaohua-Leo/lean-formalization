@@ -430,20 +430,26 @@ class Installer:
                         })
                 else:
                     array_name = mcp.get("arrayOfTables")
-                    for server_id in self.mcp_servers_to_mount():
-                        action = {
+                    if array_name:
+                        # One action for ALL servers: per-server actions would rewrite
+                        # the file once per server (new backup, churn) even when the
+                        # final bytes are identical.
+                        self.actions.append({
                             "kind": "toml_table", "path": path, "scope": target["scope"],
-                            "fields": self.toml_fields(hid, server_id),
-                            "label": "%s: mcp server %s -> %s" % (hid, server_id, path),
-                        }
-                        if array_name:
-                            # One [[table]] per server: a single [table] would make the
-                            # second server overwrite the first.
-                            action["array_of_tables"] = array_name
-                            action["name"] = server_id
-                        else:
-                            action["table"] = mcp.get("table", "mcp_servers").replace("{name}", server_id)
-                        self.actions.append(action)
+                            "array_of_tables": array_name,
+                            "array_entries": [self.toml_fields(hid, sid)
+                                              for sid in self.mcp_servers_to_mount()],
+                            "label": "%s: mcp servers %s -> %s" % (
+                                hid, "+".join(self.mcp_servers_to_mount()), path),
+                        })
+                    else:
+                        for server_id in self.mcp_servers_to_mount():
+                            self.actions.append({
+                                "kind": "toml_table", "path": path, "scope": target["scope"],
+                                "table": mcp.get("table", "mcp_servers").replace("{name}", server_id),
+                                "fields": self.toml_fields(hid, server_id),
+                                "label": "%s: mcp server %s -> %s" % (hid, server_id, path),
+                            })
 
     def json_shape(self, hid: str, server_id: str, mcp: dict) -> tuple[list[str], dict, list[str] | None]:
         """Key path, entry object and any stale key path to clean up, for this harness."""
@@ -843,9 +849,10 @@ class Installer:
         return "\n".join(lines) + "\n\n"
 
     def compose_toml_array_table(self, path: Path, action: dict) -> str:
-        """Replace OUR [[table]] entry (matched by its `name` field), keep the rest."""
+        """Replace OUR [[table]] entries (matched by `name`), keep everyone else's."""
         name = action["array_of_tables"]
-        server = action["name"]
+        entries = action["array_entries"]
+        ours = {str(entry.get("name")) for entry in entries}
         header = "[[%s]]" % name
         lines = read_text(path).splitlines(keepends=True) if path.is_file() else []
         kept: list[str] = []
@@ -859,8 +866,9 @@ class Installer:
                     chunk.append(lines[index])
                     index += 1
                 body = "".join(chunk)
-                if re.search(r'(?m)^\s*name\s*=\s*"%s"\s*$' % re.escape(server), body):
-                    continue  # ours: it is replaced below
+                block_name = re.search(r'(?m)^\s*name\s*=\s*"([^"]*)"\s*$', body)
+                if block_name and block_name.group(1) in ours:
+                    continue  # ours: replaced below
                 kept.append(body)
                 continue
             kept.append(line)
@@ -873,7 +881,7 @@ class Installer:
             text += "\n"
         if text.strip():
             text += "\n"
-        return text + self.toml_array_block(name, action["fields"])
+        return text + "".join(self.toml_array_block(name, entry) for entry in entries)
 
     def toml_block(self, table: str, fields: dict) -> str:
         lines = ["[%s]" % table]

@@ -95,7 +95,7 @@ What it does, and nothing else:
 | Instruction files | the delimited block from `contract.md`, between `<!-- lean-formalization:begin v1 -->` and `<!-- lean-formalization:end -->`, in each detected harness's instruction file (project and/or user scope) |
 | Skills | `skills/lean-formalization` and `skills/lean-beam` into each detected harness's skill roots |
 | MCP | the Lean MCP servers into each detected harness's MCP configuration, in that harness's own format |
-| DSH | a rendered `lean` preset under `$DSH_HOME/.agent-presets/lean/` |
+| DSH | a rendered `lean` preset under `$DSH_HOME/.agent-presets/lean/` (with an explicit `--home`, everything — including `<home>/.dsh` — is derived from that directory, so a scratch run cannot reach your real DSH home) |
 | Lean project | `lean-formalization.json`, and (unless `--no-project-gate`) `LeanAudit.lean`, `scripts/leancheck.ps1`, `scripts/leancheck.sh`, `evidence/lean/README.md` |
 
 It is idempotent (a second run writes nothing) and reversible

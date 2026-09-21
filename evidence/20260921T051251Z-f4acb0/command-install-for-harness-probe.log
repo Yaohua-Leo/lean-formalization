@@ -1,0 +1,141 @@
+$ C:\Python314\python.exe install/install.py --project D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe --home D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home --dsh-home D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\dsh-home --agents-home D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.agents --scope both
+
+lean-formalization installer
+repo            : D:\新建文件夹\lean-formalization
+home            : D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home
+agents home     : D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.agents
+dsh home        : D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\dsh-home
+scope           : both
+dry run         : False
+
+[project scope]
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe\.agents\skills\lean-formalization\SKILL.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe\.agents\skills\lean-beam\agents\openai.yaml
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe\.agents\skills\lean-beam\references\anti-patterns.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe\.agents\skills\lean-beam\references\commit-speculative.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe\.agents\skills\lean-beam\references\lean-run-at-semantics.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe\.agents\skills\lean-beam\references\mcts-search.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe\.agents\skills\lean-beam\references\workflow-details.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe\.agents\skills\lean-beam\SKILL.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe\.dsh\skills\lean-formalization\SKILL.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe\.dsh\skills\lean-beam\agents\openai.yaml
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe\.dsh\skills\lean-beam\references\anti-patterns.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe\.dsh\skills\lean-beam\references\commit-speculative.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe\.dsh\skills\lean-beam\references\lean-run-at-semantics.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe\.dsh\skills\lean-beam\references\mcts-search.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe\.dsh\skills\lean-beam\references\workflow-details.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe\.dsh\skills\lean-beam\SKILL.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe\CLAUDE.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe\.claude\skills\lean-formalization\SKILL.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe\.claude\skills\lean-beam\agents\openai.yaml
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe\.claude\skills\lean-beam\references\anti-patterns.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe\.claude\skills\lean-beam\references\commit-speculative.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe\.claude\skills\lean-beam\references\lean-run-at-semantics.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe\.claude\skills\lean-beam\references\mcts-search.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe\.claude\skills\lean-beam\references\workflow-details.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe\.claude\skills\lean-beam\SKILL.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe\.mcp.json
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe\AGENTS.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.codex\config.toml
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe\.opencode\skills\lean-formalization\SKILL.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe\.opencode\skills\lean-beam\agents\openai.yaml
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe\.opencode\skills\lean-beam\references\anti-patterns.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe\.opencode\skills\lean-beam\references\commit-speculative.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe\.opencode\skills\lean-beam\references\lean-run-at-semantics.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe\.opencode\skills\lean-beam\references\mcts-search.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe\.opencode\skills\lean-beam\references\workflow-details.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe\.opencode\skills\lean-beam\SKILL.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe\opencode.json
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe\GEMINI.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe\.cursor\rules\lean-formalization.mdc
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe\.cursor\skills\lean-formalization\SKILL.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe\.cursor\skills\lean-beam\agents\openai.yaml
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe\.cursor\skills\lean-beam\references\anti-patterns.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe\.cursor\skills\lean-beam\references\commit-speculative.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe\.cursor\skills\lean-beam\references\lean-run-at-semantics.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe\.cursor\skills\lean-beam\references\mcts-search.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe\.cursor\skills\lean-beam\references\workflow-details.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe\.cursor\skills\lean-beam\SKILL.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe\.cursor\mcp.json
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe\.github\copilot-instructions.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe\.vscode\mcp.json
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe\lean-formalization.json
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe\LeanAudit.lean
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe\scripts\leancheck.ps1
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe\scripts\leancheck.sh
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe\evidence\lean\README.md
+[user scope]
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.agents\skills\lean-formalization\SKILL.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.agents\skills\lean-beam\agents\openai.yaml
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.agents\skills\lean-beam\references\anti-patterns.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.agents\skills\lean-beam\references\commit-speculative.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.agents\skills\lean-beam\references\lean-run-at-semantics.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.agents\skills\lean-beam\references\mcts-search.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.agents\skills\lean-beam\references\workflow-details.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.agents\skills\lean-beam\SKILL.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\dsh-home\skills\lean-formalization\SKILL.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\dsh-home\skills\lean-beam\agents\openai.yaml
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\dsh-home\skills\lean-beam\references\anti-patterns.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\dsh-home\skills\lean-beam\references\commit-speculative.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\dsh-home\skills\lean-beam\references\lean-run-at-semantics.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\dsh-home\skills\lean-beam\references\mcts-search.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\dsh-home\skills\lean-beam\references\workflow-details.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\dsh-home\skills\lean-beam\SKILL.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.claude\CLAUDE.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.claude\skills\lean-formalization\SKILL.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.claude\skills\lean-beam\agents\openai.yaml
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.claude\skills\lean-beam\references\anti-patterns.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.claude\skills\lean-beam\references\commit-speculative.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.claude\skills\lean-beam\references\lean-run-at-semantics.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.claude\skills\lean-beam\references\mcts-search.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.claude\skills\lean-beam\references\workflow-details.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.claude\skills\lean-beam\SKILL.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.codex\AGENTS.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.codex\skills\lean-formalization\SKILL.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.codex\skills\lean-beam\agents\openai.yaml
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.codex\skills\lean-beam\references\anti-patterns.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.codex\skills\lean-beam\references\commit-speculative.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.codex\skills\lean-beam\references\lean-run-at-semantics.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.codex\skills\lean-beam\references\mcts-search.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.codex\skills\lean-beam\references\workflow-details.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.codex\skills\lean-beam\SKILL.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.config\opencode\AGENTS.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.config\opencode\skills\lean-formalization\SKILL.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.config\opencode\skills\lean-beam\agents\openai.yaml
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.config\opencode\skills\lean-beam\references\anti-patterns.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.config\opencode\skills\lean-beam\references\commit-speculative.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.config\opencode\skills\lean-beam\references\lean-run-at-semantics.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.config\opencode\skills\lean-beam\references\mcts-search.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.config\opencode\skills\lean-beam\references\workflow-details.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.config\opencode\skills\lean-beam\SKILL.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.config\opencode\opencode.json
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.gemini\GEMINI.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.gemini\skills\lean-formalization\SKILL.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.gemini\skills\lean-beam\agents\openai.yaml
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.gemini\skills\lean-beam\references\anti-patterns.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.gemini\skills\lean-beam\references\commit-speculative.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.gemini\skills\lean-beam\references\lean-run-at-semantics.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.gemini\skills\lean-beam\references\mcts-search.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.gemini\skills\lean-beam\references\workflow-details.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.gemini\skills\lean-beam\SKILL.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.gemini\settings.json
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.cursor\skills\lean-formalization\SKILL.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.cursor\skills\lean-beam\agents\openai.yaml
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.cursor\skills\lean-beam\references\anti-patterns.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.cursor\skills\lean-beam\references\commit-speculative.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.cursor\skills\lean-beam\references\lean-run-at-semantics.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.cursor\skills\lean-beam\references\mcts-search.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.cursor\skills\lean-beam\references\workflow-details.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.cursor\skills\lean-beam\SKILL.md
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\.cursor\mcp.json
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\dsh-home\.agent-presets\lean\preset.yml
+    + D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-home\dsh-home\.agent-presets\lean\agent.cordis.yml
+
+mode            : lsp-fallback
+project         : D:\新建文件夹\lean-formalization\.smoke\20260921T051251Z-f4acb0\harness-probe
+harnesses       : dsh, claude-code, codex, opencode, gemini-cli, cursor, vscode
+prereqs         : uvx=ok, rg=missing (lean_local_search and lean_verify source scanning need ripgrep on PATH)
+
+next: restart the harnesses you use (or start a new session), then verify with
+      python verify/probe_mcp.py --harnesses --project .   (add --env UV_CACHE_DIR=… in a sandbox)
+uninstall: python install/install.py --uninstall

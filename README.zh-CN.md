@@ -40,8 +40,8 @@ python verify/probe_mcp.py --harnesses --project /你的/lean/项目            
 ## 支持的 harness
 
 Tier 1 = 配置路径在作者机器上核对过（本地检查 / 厂商文档 / stdio 探针）。Tier 2 =
-随仓库发布但未端到端实测，只有加 `--include-unverified` 才会写。
-每条路径的出处见 [`docs/harness-matrix.md`](docs/harness-matrix.md)。
+随仓库发布但未端到端实测，只有加 `--include-unverified` 或在 `--harnesses` 里点名才会写。
+每条路径的出处与逐 harness 的实测状态列见 [`docs/harness-matrix.md`](docs/harness-matrix.md)。
 
 | Tier | Harness | 指令文件 | 技能根 | MCP |
 |---|---|---|---|---|

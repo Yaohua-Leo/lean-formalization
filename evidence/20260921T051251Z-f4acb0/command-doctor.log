@@ -1,0 +1,21 @@
+$ C:\Python314\python.exe install/install.py --doctor --project D:\the_bible_of_Jordan
+
+lean-formalization doctor
+home            : C:\Users\Leo
+project         : D:\the_bible_of_Jordan  (not a Lean project)
+mcp mode        : beam
+beam launcher   : D:\the_bible_of_Jordan\tools\beam-mcp.ps1
+prereqs         : uvx=ok, rg=missing (lean_local_search and lean_verify source scanning need ripgrep on PATH)
+
+harness          tier     detected   block     skills    mcp configured
+dsh              1        True       -         1/4       preset
+claude-code      1        True       0/2       0/2       0/1
+codex            1        True       0/2       0/1       0/1
+opencode         1        True       0/2       1/4       0/2
+gemini-cli       1        True       0/2       0/1       0/1
+cursor           1        True       0/2       0/2       0/2
+vscode           1        True       0/2       -         0/1
+mistral-vibe     2        False      -         -         0/1
+generic-agents-md 2        True       0/2       1/2       -
+
+note: a freshly written config only takes effect after the harness restarts (see docs/harness-matrix.md for each harness's reload rule).

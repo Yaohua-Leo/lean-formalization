@@ -108,6 +108,8 @@ def main(argv: list[str] | None = None) -> int:
         Step("gate-shell", [python, "verify/check_gate_shell.py"], required=True,
              note="the POSIX gate's embedded Python: parses, reads config, enforces the whitelist "
                   "(the shell wrapper itself needs a real bash and is not covered)"),
+        Step("provenance-recheck", [python, "verify/provenance_recheck.py"], required=True,
+             note="a second, independent implementation of the vendored-hash check"),
     ]
 
     if not args.no_probe and shutil.which("uvx"):

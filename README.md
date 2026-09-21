@@ -42,11 +42,12 @@ only what it created, and it leaves a file you edited afterwards in place.
 
 ## Harnesses
 
-Tier 1 = the configuration paths were verified on the authoring machine (by local
+Tier 1 = the configuration paths were checked on the authoring machine (by local
 inspection, by each harness's own documentation, and by the stdio probe). Tier 2 =
-shipped but not verified end-to-end; written only with `--include-unverified`.
-The full table, with the provenance of every path, is in
-[`docs/harness-matrix.md`](docs/harness-matrix.md).
+shipped but not verified end-to-end; written only with `--include-unverified` or by
+naming it in `--harnesses`.
+The full table, with the provenance of every path and a per-harness status column,
+is in [`docs/harness-matrix.md`](docs/harness-matrix.md).
 
 | Tier | Harness | Instructions | Skills | MCP |
 |---|---|---|---|---|

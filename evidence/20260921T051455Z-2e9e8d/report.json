@@ -1,0 +1,110 @@
+{
+  "gate": "lean-formalization acceptance",
+  "runId": "20260921T051455Z-2e9e8d",
+  "timestampUtc": "20260921T051455Z",
+  "ok": true,
+  "repo": "D:\\\u65b0\u5efa\u6587\u4ef6\u5939\\lean-formalization",
+  "python": "C:\\Python314\\python.exe",
+  "uvx": "D:\\kimi-code-cli\\uv\\uvx.EXE",
+  "steps": [
+    {
+      "name": "validate-repo",
+      "command": "node verify/validate_repo.mjs",
+      "exitCode": 0,
+      "seconds": 0.0,
+      "required": true,
+      "note": "",
+      "cwd": "D:\\\u65b0\u5efa\u6587\u4ef6\u5939\\lean-formalization"
+    },
+    {
+      "name": "smoke",
+      "command": "C:\\Python314\\python.exe verify/smoke.py --with-gate --work D:\\\u65b0\u5efa\u6587\u4ef6\u5939\\lean-formalization\\.smoke\\20260921T051455Z-2e9e8d\\smoke",
+      "exitCode": 0,
+      "seconds": 8.6,
+      "required": true,
+      "note": "install \u2192 assert \u2192 idempotence \u2192 uninstall, plus a real Lean build",
+      "cwd": "D:\\\u65b0\u5efa\u6587\u4ef6\u5939\\lean-formalization"
+    },
+    {
+      "name": "gate-shell",
+      "command": "C:\\Python314\\python.exe verify/check_gate_shell.py",
+      "exitCode": 0,
+      "seconds": 0.3,
+      "required": true,
+      "note": "the POSIX gate's embedded Python: parses, reads config, enforces the whitelist (the shell wrapper itself needs a real bash and is not covered)",
+      "cwd": "D:\\\u65b0\u5efa\u6587\u4ef6\u5939\\lean-formalization"
+    },
+    {
+      "name": "provenance-recheck",
+      "command": "C:\\Python314\\python.exe verify/provenance_recheck.py",
+      "exitCode": 0,
+      "seconds": 0.0,
+      "required": true,
+      "note": "a second, independent implementation of the vendored-hash check",
+      "cwd": "D:\\\u65b0\u5efa\u6587\u4ef6\u5939\\lean-formalization"
+    },
+    {
+      "name": "probe-lean-lsp",
+      "command": "C:\\Python314\\python.exe verify/probe_mcp.py --command uvx lean-lsp-mcp --env LEAN_LOG_LEVEL=NONE --env LEAN_MCP_DISABLED_TOOLS=lean_build,lean_run_code --env UV_CACHE_DIR=D:\\\u65b0\u5efa\u6587\u4ef6\u5939\\lean-formalization\\.uv-probe\\cache --env UV_TOOL_DIR=D:\\\u65b0\u5efa\u6587\u4ef6\u5939\\lean-formalization\\.uv-probe\\tools --expect lean_goal --expect lean_diagnostic_messages --expect lean_local_search --forbid lean_build --forbid lean_run_code --timeout 300",
+      "exitCode": 0,
+      "seconds": 1.0,
+      "required": true,
+      "note": "the exact command the lsp-fallback configuration records",
+      "cwd": "D:\\\u65b0\u5efa\u6587\u4ef6\u5939\\lean-formalization"
+    },
+    {
+      "name": "doctor",
+      "command": "C:\\Python314\\python.exe install/install.py --doctor --project D:\\the_bible_of_Jordan",
+      "exitCode": 0,
+      "seconds": 0.6,
+      "required": false,
+      "note": "per-harness detection and file presence",
+      "cwd": "D:\\\u65b0\u5efa\u6587\u4ef6\u5939\\lean-formalization"
+    },
+    {
+      "name": "dry-run-target-project",
+      "command": "C:\\Python314\\python.exe install/install.py --project D:\\the_bible_of_Jordan --home D:\\\u65b0\u5efa\u6587\u4ef6\u5939\\lean-formalization\\.smoke\\20260921T051455Z-2e9e8d\\dryrun-home --scope both --dry-run",
+      "exitCode": 0,
+      "seconds": 0.5,
+      "required": false,
+      "note": "writes nothing; the plan is inspected by the reviewer",
+      "cwd": "D:\\\u65b0\u5efa\u6587\u4ef6\u5939\\lean-formalization"
+    },
+    {
+      "name": "install-for-harness-probe",
+      "command": "C:\\Python314\\python.exe install/install.py --project D:\\\u65b0\u5efa\u6587\u4ef6\u5939\\lean-formalization\\.smoke\\20260921T051455Z-2e9e8d\\harness-probe --home D:\\\u65b0\u5efa\u6587\u4ef6\u5939\\lean-formalization\\.smoke\\20260921T051455Z-2e9e8d\\harness-home --dsh-home D:\\\u65b0\u5efa\u6587\u4ef6\u5939\\lean-formalization\\.smoke\\20260921T051455Z-2e9e8d\\harness-home\\dsh-home --agents-home D:\\\u65b0\u5efa\u6587\u4ef6\u5939\\lean-formalization\\.smoke\\20260921T051455Z-2e9e8d\\harness-home\\.agents --scope both",
+      "exitCode": 0,
+      "seconds": 0.9,
+      "required": false,
+      "note": "install into a throwaway Lean project + home",
+      "cwd": "D:\\\u65b0\u5efa\u6587\u4ef6\u5939\\lean-formalization"
+    },
+    {
+      "name": "claude-mcp-list",
+      "command": "C:\\Users\\Leo\\.local\\bin\\claude.EXE mcp list",
+      "exitCode": 0,
+      "seconds": 0.9,
+      "required": false,
+      "note": "informational: does Claude Code read the .mcp.json we wrote? (.mcp.json is the installer's own surface; .claude.json is not touched)",
+      "cwd": "D:\\\u65b0\u5efa\u6587\u4ef6\u5939\\lean-formalization\\.smoke\\20260921T051455Z-2e9e8d\\harness-probe"
+    },
+    {
+      "name": "codex-mcp-list",
+      "command": "cmd /c C:\\Users\\Leo\\AppData\\Roaming\\npm\\codex.CMD mcp list",
+      "exitCode": 0,
+      "seconds": 0.3,
+      "required": false,
+      "note": "informational: does Codex read the config.toml we wrote? (CODEX_HOME points at the throwaway home)",
+      "cwd": "D:\\\u65b0\u5efa\u6587\u4ef6\u5939\\lean-formalization\\.smoke\\20260921T051455Z-2e9e8d\\harness-probe"
+    },
+    {
+      "name": "opencode-mcp-list",
+      "command": "D:\\opencode\\bin\\opencode.EXE mcp list",
+      "exitCode": 0,
+      "seconds": 1.8,
+      "required": false,
+      "note": "informational: does OpenCode read the opencode.json we wrote? (run outside a git repo: OpenCode itself may be refused permission to spawn git/uvx inside a sandbox \u2014 that is not a config failure)",
+      "cwd": "C:\\Users\\Leo\\AppData\\Local\\Temp\\lf-opencode-amxciyvu"
+    }
+  ]
+}
