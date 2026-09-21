@@ -1,0 +1,647 @@
+{
+  "schemaVersion": 1,
+  "repo": {
+    "owner": "Yaohua-Leo",
+    "name": "lean-formalization",
+    "url": "https://github.com/Yaohua-Leo/lean-formalization"
+  },
+  "contract": {
+    "version": "1",
+    "source": "contract.md",
+    "blockBegin": "<!-- lean-formalization:begin v1 -->",
+    "blockEnd": "<!-- lean-formalization:end -->",
+    "note": "Every instruction write is a delimited block. Re-running replaces block contents only; uninstall removes exactly the block."
+  },
+  "skills": {
+    "owned": [
+      "lean-formalization",
+      "lean-beam"
+    ],
+    "upstream": {
+      "repo": "https://github.com/leanprover/skills.git",
+      "commit": "7d3da0282e7b724b07620e45cf212f2e05e19334",
+      "license": "Apache-2.0",
+      "names": [
+        "lean-bisect",
+        "lean-mwe",
+        "lean-pr",
+        "lean-proof",
+        "lean-setup",
+        "mathlib-build",
+        "mathlib-pr",
+        "mathlib-review",
+        "nightly-testing"
+      ],
+      "policy": "Installed by upstream's own per-harness installers when the network allows; the installer never vendors or rewrites them. A pinned-commit clone plus copy is the offline fallback.",
+      "installCommands": {
+        "claude-code": "claude plugin marketplace add https://github.com/leanprover/skills.git ; claude plugin install lean@leanprover",
+        "gemini-cli": "gemini skills install https://github.com/leanprover/skills --path skills",
+        "codex": "inside a Codex session: $skill-installer install https://github.com/leanprover/skills/tree/main/skills/*",
+        "portable-fallback": "git -c http.sslBackend=openssl clone --depth 1 --branch main https://github.com/leanprover/skills.git <tmp> && cp -r <tmp>/skills/* <harness-skill-root>/"
+      }
+    },
+    "beam": {
+      "repo": "https://github.com/leanprover/lean-beam.git",
+      "commit": "6511cd96917d74cf59e03e303c69e2b6785aba78",
+      "license": "Apache-2.0",
+      "vendored": "skills/lean-beam/**",
+      "upstreamInstaller": "./scripts/install-beam.sh --claude|--codex|--opencode|--vibe|--pi|--all-skills",
+      "installs": [
+        "lean-beam",
+        "lean-beam-search",
+        "lean-beam-mcp"
+      ],
+      "installRootEnv": "BEAM_INSTALL_ROOT (default ~/.local/share/beam)",
+      "requires": [
+        "elan on PATH"
+      ]
+    }
+  },
+  "mcp": {
+    "mode": "beam-first-with-lsp-fallback",
+    "decisionRule": "If a Beam MCP launcher is detected, mount lean-beam and disable the lean-lsp tools Beam owns. Otherwise mount lean-lsp alone with goal/diagnostics/search tools ENABLED. The decision is recorded in lean-formalization.json so re-runs are stable.",
+    "servers": {
+      "lean-lsp": {
+        "required": true,
+        "transport": "stdio",
+        "command": [
+          "uvx",
+          "lean-lsp-mcp"
+        ],
+        "env": {
+          "LEAN_LOG_LEVEL": "NONE"
+        },
+        "envOptional": {
+          "LEAN_PROJECT_PATH": "absolute Lean project root; only needed for streamable-http/sse transports",
+          "UV_CACHE_DIR": "set only when uv's default cache is not writable (restricted sandboxes)",
+          "UV_TOOL_DIR": "set only when uv's default tool dir is not writable (restricted sandboxes)"
+        },
+        "disabledTools": {
+          "beam": [
+            "lean_build",
+            "lean_run_code",
+            "lean_goal",
+            "lean_term_goal",
+            "lean_diagnostic_messages",
+            "lean_hover_info",
+            "lean_file_outline",
+            "lean_completions",
+            "lean_code_actions",
+            "lean_get_widgets",
+            "lean_get_widget_source"
+          ],
+          "lspFallback": [
+            "lean_build",
+            "lean_run_code"
+          ]
+        },
+        "disabledToolsRationale": "lean_build must not replace the deterministic project build; lean_run_code is an arbitrary-code-execution surface. Under Beam mode the goal/diagnostic/hover/outline tools are Beam's and every duplicated schema costs tokens.",
+        "timeoutMs": 120000,
+        "failOnStartupError": false,
+        "prereqs": [
+          {
+            "command": "uvx",
+            "required": true,
+            "installUrl": "https://docs.astral.sh/uv/getting-started/installation/"
+          },
+          {
+            "command": "rg",
+            "required": false,
+            "why": "lean_local_search and lean_verify source scanning need ripgrep on PATH",
+            "installUrl": "https://github.com/BurntSushi/ripgrep"
+          }
+        ],
+        "docUrl": "https://pypi.org/project/lean-lsp-mcp/"
+      },
+      "lean-beam": {
+        "required": false,
+        "transport": "stdio",
+        "command": [
+          "lean-beam-mcp"
+        ],
+        "detect": [
+          {
+            "kind": "command",
+            "value": "lean-beam-mcp --version"
+          },
+          {
+            "kind": "path",
+            "value": "~/.local/bin/lean-beam-mcp"
+          },
+          {
+            "kind": "path",
+            "value": "<project>/tools/beam-mcp.ps1",
+            "launcher": [
+              "powershell.exe",
+              "-NoProfile",
+              "-ExecutionPolicy",
+              "Bypass",
+              "-File",
+              "<project>/tools/beam-mcp.ps1"
+            ]
+          },
+          {
+            "kind": "path",
+            "value": "<project>/tools/beam.ps1",
+            "launcher": [
+              "powershell.exe",
+              "-NoProfile",
+              "-ExecutionPolicy",
+              "Bypass",
+              "-File",
+              "<project>/tools/beam.ps1"
+            ]
+          }
+        ],
+        "timeoutMs": 180000,
+        "failOnStartupError": false,
+        "docUrl": "https://github.com/leanprover/lean-beam"
+      }
+    }
+  },
+  "harnesses": {
+    "dsh": {
+      "displayName": "DeepSeek Harness (DSH)",
+      "tier": 1,
+      "detect": {
+        "env": [
+          "DSH_HOME"
+        ],
+        "paths": [
+          "~/.dsh"
+        ]
+      },
+      "instructions": [
+        {
+          "scope": "preset",
+          "method": "dsh-preset",
+          "path": "<DSH_HOME>/.agent-presets/lean/agent.cordis.yml",
+          "note": "Rendered from dsh/preset/agent.cordis.yml.tmpl; the contract becomes the persona prefix."
+        }
+      ],
+      "skillRoots": [
+        {
+          "scope": "user",
+          "path": "<DSH_AGENTS_HOME or ~/.agents>/skills"
+        },
+        {
+          "scope": "user",
+          "path": "<DSH_HOME>/skills"
+        },
+        {
+          "scope": "project",
+          "path": "<project>/.agents/skills"
+        },
+        {
+          "scope": "project",
+          "path": "<project>/.dsh/skills"
+        }
+      ],
+      "mcp": {
+        "method": "dsh-preset",
+        "target": "<DSH_HOME>/.agent-presets/lean/agent.cordis.yml"
+      },
+      "reload": "Preset directories are scanned on demand; the composition of an existing session is fixed for its lifetime. Start a NEW session to pick up the preset, then assert that mcp__lean-beam__* / mcp__lean-lsp__* and the skills appear.",
+      "verified": {
+        "paths": "local-inspection",
+        "sourceFiles": [
+          "deepseek-harness/packages/preset/agent-presets/src/discovery.ts:51 (USER_PRESET_DIR)",
+          "deepseek-harness/packages/skill/skill-filesystem/src/index.ts:245-264 (skill roots)"
+        ]
+      }
+    },
+    "claude-code": {
+      "displayName": "Claude Code",
+      "tier": 1,
+      "detect": {
+        "commands": [
+          "claude"
+        ],
+        "paths": [
+          "~/.claude"
+        ]
+      },
+      "instructions": [
+        {
+          "scope": "user",
+          "path": "~/.claude/CLAUDE.md"
+        },
+        {
+          "scope": "project",
+          "path": "CLAUDE.md"
+        }
+      ],
+      "skillRoots": [
+        {
+          "scope": "user",
+          "path": "~/.claude/skills"
+        },
+        {
+          "scope": "project",
+          "path": ".claude/skills"
+        }
+      ],
+      "mcp": {
+        "method": "file-json",
+        "targets": [
+          {
+            "scope": "project",
+            "path": ".mcp.json"
+          }
+        ],
+        "keyPath": [
+          "mcpServers"
+        ],
+        "entry": {
+          "command": "{command}",
+          "args": "{args}",
+          "env": "{env}"
+        },
+        "nativeCli": "claude mcp add --scope user <name> uvx lean-lsp-mcp -e LEAN_LOG_LEVEL=NONE -e LEAN_MCP_DISABLED_TOOLS=<list>  (the CLI owns ~/.claude.json for user scope; never hand-edit that file)",
+        "projectNote": "Project scope writes .mcp.json, which is the file this installer manages."
+      },
+      "reload": "Restart Claude Code (or start a new session) after changing MCP servers or global memory.",
+      "verified": {
+        "paths": "local-inspection",
+        "sourceFiles": [
+          "claude mcp add --help (observed: --scope local|user|project, -e KEY=value)",
+          "https://pypi.org/project/lean-lsp-mcp/ (project .mcp.json shape)"
+        ]
+      }
+    },
+    "codex": {
+      "displayName": "Codex CLI",
+      "tier": 1,
+      "detect": {
+        "commands": [
+          "codex"
+        ],
+        "paths": [
+          "~/.codex"
+        ]
+      },
+      "instructions": [
+        {
+          "scope": "user",
+          "path": "~/.codex/AGENTS.md"
+        },
+        {
+          "scope": "project",
+          "path": "AGENTS.md"
+        }
+      ],
+      "skillRoots": [
+        {
+          "scope": "user",
+          "path": "~/.codex/skills"
+        }
+      ],
+      "mcp": {
+        "method": "file-toml",
+        "target": "~/.codex/config.toml",
+        "table": "mcp_servers.{name}",
+        "fields": {
+          "command": "{command}",
+          "args": "{args}",
+          "env": "{env}"
+        },
+        "note": "codex mcp --help refuses to run without a TTY in this environment; the documented TOML shape is written directly and verified by stdio probe."
+      },
+      "reload": "Restart Codex after editing config.toml.",
+      "verified": {
+        "paths": "local-inspection",
+        "sourceFiles": [
+          "~/.codex/config.toml (observed [mcp_servers.<name>] with command/args/env)",
+          "~/.codex/AGENTS.md and ~/.codex/skills exist on this machine"
+        ]
+      }
+    },
+    "opencode": {
+      "displayName": "OpenCode",
+      "tier": 1,
+      "detect": {
+        "commands": [
+          "opencode"
+        ],
+        "paths": [
+          "~/.config/opencode"
+        ]
+      },
+      "instructions": [
+        {
+          "scope": "user",
+          "path": "~/.config/opencode/AGENTS.md"
+        },
+        {
+          "scope": "project",
+          "path": "AGENTS.md"
+        }
+      ],
+      "skillRoots": [
+        {
+          "scope": "user",
+          "path": "~/.config/opencode/skills"
+        },
+        {
+          "scope": "user",
+          "path": "~/.agents/skills"
+        },
+        {
+          "scope": "project",
+          "path": ".opencode/skills"
+        },
+        {
+          "scope": "project",
+          "path": ".agents/skills"
+        }
+      ],
+      "mcp": {
+        "method": "file-json",
+        "targets": [
+          {
+            "scope": "user",
+            "path": "~/.config/opencode/opencode.json"
+          },
+          {
+            "scope": "project",
+            "path": "opencode.json"
+          }
+        ],
+        "keyPath": [
+          "mcp",
+          "servers"
+        ],
+        "entry": {
+          "type": "local",
+          "command": "[command, ...args]",
+          "environment": "{env}"
+        },
+        "entryNote": "OpenCode V2 uses mcp.servers (NOT mcp directly); command is an ARRAY; env key is `environment`.",
+        "nativeCli": [
+          "opencode",
+          "mcp",
+          "add",
+          "{name}",
+          "--global",
+          "--"
+        ]
+      },
+      "reload": "Restart OpenCode; V2 resolves MCP servers at startup.",
+      "verified": {
+        "paths": "vendor-doc",
+        "sourceFiles": [
+          "https://opencode.ai/v2/docs/instructions",
+          "https://opencode.ai/v2/docs/skills/",
+          "https://opencode.ai/v2/docs/mcp-servers/"
+        ]
+      }
+    },
+    "gemini-cli": {
+      "displayName": "Gemini CLI",
+      "tier": 1,
+      "detect": {
+        "commands": [
+          "gemini"
+        ],
+        "paths": [
+          "~/.gemini"
+        ]
+      },
+      "instructions": [
+        {
+          "scope": "user",
+          "path": "~/.gemini/GEMINI.md"
+        },
+        {
+          "scope": "project",
+          "path": "GEMINI.md"
+        }
+      ],
+      "skillRoots": [
+        {
+          "scope": "user",
+          "path": "~/.gemini/skills"
+        }
+      ],
+      "mcp": {
+        "method": "file-json",
+        "targets": [
+          {
+            "scope": "user",
+            "path": "~/.gemini/settings.json"
+          }
+        ],
+        "keyPath": [
+          "mcpServers"
+        ],
+        "entry": {
+          "command": "{command}",
+          "args": "{args}",
+          "env": "{env}"
+        },
+        "note": "gemini mcp --help hangs in this environment (timed out at 180s); write settings.json directly. Upstream skills install: gemini skills install <repo> --path skills."
+      },
+      "reload": "Restart Gemini CLI after editing settings.json.",
+      "verified": {
+        "paths": "local-inspection",
+        "sourceFiles": [
+          "~/.gemini/settings.json (observed top-level mcpServers object)",
+          "leanprover/skills README (gemini skills install command)"
+        ]
+      }
+    },
+    "cursor": {
+      "displayName": "Cursor",
+      "tier": 1,
+      "detect": {
+        "commands": [
+          "cursor"
+        ],
+        "paths": [
+          "~/.cursor"
+        ]
+      },
+      "instructions": [
+        {
+          "scope": "project",
+          "path": "AGENTS.md"
+        },
+        {
+          "scope": "project",
+          "path": ".cursor/rules/lean-formalization.mdc",
+          "header": "---\ndescription: Lean 4 formalization contract\nalwaysApply: true\n---\n"
+        }
+      ],
+      "skillRoots": [
+        {
+          "scope": "user",
+          "path": "~/.cursor/skills"
+        },
+        {
+          "scope": "project",
+          "path": ".cursor/skills"
+        }
+      ],
+      "mcp": {
+        "method": "file-json",
+        "targets": [
+          {
+            "scope": "user",
+            "path": "~/.cursor/mcp.json"
+          },
+          {
+            "scope": "project",
+            "path": ".cursor/mcp.json"
+          }
+        ],
+        "keyPath": [
+          "mcpServers"
+        ],
+        "entry": {
+          "command": "{command}",
+          "args": "{args}",
+          "env": "{env}"
+        }
+      },
+      "reload": "Reload the Cursor window; MCP servers are (re)connected at startup.",
+      "verified": {
+        "paths": "local-inspection",
+        "sourceFiles": [
+          "~/.cursor/mcp.json (observed top-level mcpServers)",
+          "~/.cursor/skills exists on this machine"
+        ]
+      }
+    },
+    "vscode": {
+      "displayName": "VS Code / GitHub Copilot",
+      "tier": 1,
+      "detect": {
+        "commands": [
+          "code"
+        ]
+      },
+      "instructions": [
+        {
+          "scope": "project",
+          "path": ".github/copilot-instructions.md"
+        },
+        {
+          "scope": "project",
+          "path": "AGENTS.md"
+        }
+      ],
+      "skillRoots": [],
+      "mcp": {
+        "method": "file-json",
+        "targets": [
+          {
+            "scope": "project",
+            "path": ".vscode/mcp.json"
+          }
+        ],
+        "keyPath": [
+          "servers"
+        ],
+        "entry": {
+          "type": "stdio",
+          "command": "{command}",
+          "args": "{args}",
+          "env": "{env}"
+        },
+        "nativeCli": [
+          "code",
+          "--add-mcp",
+          "{json}"
+        ]
+      },
+      "reload": "Reload the window; the language model tools list is rebuilt at startup.",
+      "verified": {
+        "paths": "local-inspection",
+        "sourceFiles": [
+          "code --help (observed: --add-mcp <json> adds an MCP server definition)",
+          "https://pypi.org/project/lean-lsp-mcp/ (workspace mcp.json {\"servers\": ...} shape)"
+        ]
+      }
+    },
+    "mistral-vibe": {
+      "displayName": "Mistral Vibe",
+      "tier": 2,
+      "detect": {
+        "commands": [
+          "vibe"
+        ],
+        "paths": [
+          "~/.vibe"
+        ]
+      },
+      "instructions": [],
+      "skillRoots": [],
+      "mcp": {
+        "method": "file-toml",
+        "targets": [
+          {
+            "scope": "user",
+            "path": "~/.vibe/config.toml"
+          }
+        ],
+        "arrayOfTables": "mcp_servers",
+        "fields": {
+          "name": "{name}",
+          "transport": "stdio",
+          "command": "{command}",
+          "args": "{args}",
+          "tool_timeout_sec": 600
+        },
+        "note": "Removing an existing `mcp_servers = []` line is required before appending tables."
+      },
+      "reload": "Restart Vibe.",
+      "verified": {
+        "paths": "vendor-doc",
+        "sourceFiles": [
+          "https://pypi.org/project/lean-lsp-mcp/ (Mistral Vibe section)"
+        ]
+      }
+    },
+    "generic-agents-md": {
+      "displayName": "Any AGENTS.md-aware agent (Amp, Zed, Goose, Qwen Code, Crush, ...)",
+      "tier": 2,
+      "detect": {
+        "commands": [],
+        "paths": [],
+        "always": true
+      },
+      "instructions": [
+        {
+          "scope": "project",
+          "path": "AGENTS.md"
+        },
+        {
+          "scope": "user",
+          "path": "~/.agents/AGENTS.md",
+          "note": "Not every agent reads a user-level AGENTS.md; project scope is the reliable one."
+        }
+      ],
+      "skillRoots": [
+        {
+          "scope": "user",
+          "path": "~/.agents/skills"
+        },
+        {
+          "scope": "project",
+          "path": ".agents/skills"
+        }
+      ],
+      "mcp": {
+        "method": "none",
+        "note": "No universal MCP config path exists. Use this harness's own `mcp add`/settings UI; the canonical server definitions to paste are in docs/harness-matrix.md."
+      },
+      "reload": "Restart the agent after installing skills or MCP servers.",
+      "verified": {
+        "paths": "convention",
+        "sourceFiles": [
+          "OpenCode V2 skills docs list .agents/skills and ~/.agents/skills as compatibility roots"
+        ]
+      }
+    }
+  }
+}

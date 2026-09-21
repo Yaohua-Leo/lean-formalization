@@ -1,0 +1,14 @@
+# scratch and test artifacts
+.smoke/
+.lf-*/
+.uv-probe/
+*.log
+
+# python
+__pycache__/
+*.pyc
+
+# editors / OS
+.DS_Store
+Thumbs.db
+.vscode/settings.json
