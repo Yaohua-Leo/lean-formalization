@@ -47,7 +47,7 @@ Tier 1 = 配置路径在作者机器上核对过（本地检查 / 厂商文档 /
 | 1 | DSH（DeepSeek Harness） | preset persona | `~/.agents/skills` 与项目根 | 渲染后的 preset |
 | 1 | Claude Code | `~/.claude/CLAUDE.md`、`CLAUDE.md` | `~/.claude/skills`、`.claude/skills` | `.mcp.json` |
 | 1 | Codex CLI | `~/.codex/AGENTS.md`、`AGENTS.md` | `~/.codex/skills` | `~/.codex/config.toml` |
-| 1 | OpenCode | `~/.config/opencode/AGENTS.md`、`AGENTS.md` | 4 个根，含 `~/.agents/skills` | `opencode.json` 的 `mcp.servers` |
+| 1 | OpenCode | `~/.config/opencode/AGENTS.md`、`AGENTS.md` | 4 个根，含 `~/.agents/skills` | 1.x 用 `mcp.<名>`，2.x 用 `mcp.servers`（自动探测） |
 | 1 | Gemini CLI | `~/.gemini/GEMINI.md`、`GEMINI.md` | `~/.gemini/skills` | `~/.gemini/settings.json` |
 | 1 | Cursor | `AGENTS.md`、`.cursor/rules/*.mdc` | `~/.cursor/skills`、`.cursor/skills` | `~/.cursor/mcp.json` |
 | 1 | VS Code / Copilot | `AGENTS.md`、`.github/copilot-instructions.md` | — | `.vscode/mcp.json` |

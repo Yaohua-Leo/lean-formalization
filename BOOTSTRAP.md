@@ -110,6 +110,10 @@ If the target is not a Lean project, `--scope project` is refused; use
   not verified on the authoring machine; say so in your report).
 - `--uv-cache-dir` / `--uv-tool-dir` — needed when the default `uv` cache is not
   writable by the process that will launch the MCP server (common in sandboxes).
+- `--opencode-major 1|2` — force the OpenCode MCP config shape when
+  `opencode --version` cannot be read. OpenCode 1.x names servers directly under
+  `mcp` and requires `enabled`; 2.x uses `mcp.servers`. Each major rejects the
+  other's shape, so a wrong guess makes the harness refuse to start.
 - `--doctor` — report the current state of every harness without writing anything.
 
 ---

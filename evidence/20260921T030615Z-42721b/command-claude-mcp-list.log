@@ -1,0 +1,5 @@
+$ C:\Users\Leo\.local\bin\claude.EXE mcp list
+
+Checking MCP server health…
+
+lean-lsp: uvx lean-lsp-mcp - ⏸ Pending approval (run `claude` to approve)

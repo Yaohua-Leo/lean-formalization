@@ -1,7 +1,7 @@
 {
   "gate": "lean-formalization acceptance",
-  "runId": "20260921T013411Z-185f48",
-  "timestampUtc": "20260921T013411Z",
+  "runId": "20260921T030615Z-42721b",
+  "timestampUtc": "20260921T030615Z",
   "ok": true,
   "repo": "D:\\\u65b0\u5efa\u6587\u4ef6\u5939\\lean-formalization",
   "python": "C:\\Python314\\python.exe",
@@ -18,9 +18,9 @@
     },
     {
       "name": "smoke",
-      "command": "C:\\Python314\\python.exe verify/smoke.py --with-gate --work D:\\\u65b0\u5efa\u6587\u4ef6\u5939\\lean-formalization\\.smoke\\20260921T013411Z-185f48\\smoke",
+      "command": "C:\\Python314\\python.exe verify/smoke.py --with-gate --work D:\\\u65b0\u5efa\u6587\u4ef6\u5939\\lean-formalization\\.smoke\\20260921T030615Z-42721b\\smoke",
       "exitCode": 0,
-      "seconds": 6.6,
+      "seconds": 8.0,
       "required": true,
       "note": "install \u2192 assert \u2192 idempotence \u2192 uninstall, plus a real Lean build",
       "cwd": "D:\\\u65b0\u5efa\u6587\u4ef6\u5939\\lean-formalization"
@@ -38,37 +38,55 @@
       "name": "doctor",
       "command": "C:\\Python314\\python.exe install/install.py --doctor --project D:\\the_bible_of_Jordan",
       "exitCode": 0,
-      "seconds": 0.1,
+      "seconds": 0.6,
       "required": false,
       "note": "per-harness detection and file presence",
       "cwd": "D:\\\u65b0\u5efa\u6587\u4ef6\u5939\\lean-formalization"
     },
     {
       "name": "dry-run-target-project",
-      "command": "C:\\Python314\\python.exe install/install.py --project D:\\the_bible_of_Jordan --home D:\\\u65b0\u5efa\u6587\u4ef6\u5939\\lean-formalization\\.smoke\\20260921T013411Z-185f48\\dryrun-home --scope both --dry-run",
+      "command": "C:\\Python314\\python.exe install/install.py --project D:\\the_bible_of_Jordan --home D:\\\u65b0\u5efa\u6587\u4ef6\u5939\\lean-formalization\\.smoke\\20260921T030615Z-42721b\\dryrun-home --scope both --dry-run",
       "exitCode": 0,
-      "seconds": 0.1,
+      "seconds": 0.5,
       "required": false,
       "note": "writes nothing; the plan is inspected by the reviewer",
       "cwd": "D:\\\u65b0\u5efa\u6587\u4ef6\u5939\\lean-formalization"
     },
     {
       "name": "install-for-harness-probe",
-      "command": "C:\\Python314\\python.exe install/install.py --project D:\\\u65b0\u5efa\u6587\u4ef6\u5939\\lean-formalization\\.smoke\\20260921T013411Z-185f48\\harness-probe --home D:\\\u65b0\u5efa\u6587\u4ef6\u5939\\lean-formalization\\.smoke\\20260921T013411Z-185f48\\harness-home --dsh-home D:\\\u65b0\u5efa\u6587\u4ef6\u5939\\lean-formalization\\.smoke\\20260921T013411Z-185f48\\harness-home\\dsh-home --agents-home D:\\\u65b0\u5efa\u6587\u4ef6\u5939\\lean-formalization\\.smoke\\20260921T013411Z-185f48\\harness-home\\.agents --scope project",
+      "command": "C:\\Python314\\python.exe install/install.py --project D:\\\u65b0\u5efa\u6587\u4ef6\u5939\\lean-formalization\\.smoke\\20260921T030615Z-42721b\\harness-probe --home D:\\\u65b0\u5efa\u6587\u4ef6\u5939\\lean-formalization\\.smoke\\20260921T030615Z-42721b\\harness-home --dsh-home D:\\\u65b0\u5efa\u6587\u4ef6\u5939\\lean-formalization\\.smoke\\20260921T030615Z-42721b\\harness-home\\dsh-home --agents-home D:\\\u65b0\u5efa\u6587\u4ef6\u5939\\lean-formalization\\.smoke\\20260921T030615Z-42721b\\harness-home\\.agents --scope both",
       "exitCode": 0,
-      "seconds": 0.3,
+      "seconds": 0.9,
       "required": false,
-      "note": "project-scope install into a throwaway Lean project",
+      "note": "install into a throwaway Lean project + home",
       "cwd": "D:\\\u65b0\u5efa\u6587\u4ef6\u5939\\lean-formalization"
     },
     {
       "name": "claude-mcp-list",
-      "command": "claude mcp list",
+      "command": "C:\\Users\\Leo\\.local\\bin\\claude.EXE mcp list",
       "exitCode": 0,
       "seconds": 0.9,
       "required": false,
       "note": "informational: does Claude Code read the .mcp.json we wrote? (.mcp.json is the installer's own surface; .claude.json is not touched)",
-      "cwd": "D:\\\u65b0\u5efa\u6587\u4ef6\u5939\\lean-formalization\\.smoke\\20260921T013411Z-185f48\\harness-probe"
+      "cwd": "D:\\\u65b0\u5efa\u6587\u4ef6\u5939\\lean-formalization\\.smoke\\20260921T030615Z-42721b\\harness-probe"
+    },
+    {
+      "name": "codex-mcp-list",
+      "command": "cmd /c C:\\Users\\Leo\\AppData\\Roaming\\npm\\codex.CMD mcp list",
+      "exitCode": 0,
+      "seconds": 0.3,
+      "required": false,
+      "note": "informational: does Codex read the config.toml we wrote? (CODEX_HOME points at the throwaway home)",
+      "cwd": "D:\\\u65b0\u5efa\u6587\u4ef6\u5939\\lean-formalization\\.smoke\\20260921T030615Z-42721b\\harness-probe"
+    },
+    {
+      "name": "opencode-mcp-list",
+      "command": "D:\\opencode\\bin\\opencode.EXE mcp list",
+      "exitCode": 0,
+      "seconds": 0.7,
+      "required": false,
+      "note": "informational: does OpenCode read the opencode.json we wrote? (run outside a git repo: OpenCode itself may be refused permission to spawn git/uvx inside a sandbox \u2014 that is not a config failure)",
+      "cwd": "C:\\Users\\Leo\\AppData\\Local\\Temp\\dsh-ldvcXx\\lf-opencode-ukfcd7t9"
     }
   ]
 }

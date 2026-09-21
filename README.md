@@ -52,7 +52,7 @@ The full table, with the provenance of every path, is in
 | 1 | DSH (DeepSeek Harness) | preset persona | `~/.agents/skills`, project roots | rendered preset |
 | 1 | Claude Code | `~/.claude/CLAUDE.md`, `CLAUDE.md` | `~/.claude/skills`, `.claude/skills` | `.mcp.json` |
 | 1 | Codex CLI | `~/.codex/AGENTS.md`, `AGENTS.md` | `~/.codex/skills` | `~/.codex/config.toml` |
-| 1 | OpenCode | `~/.config/opencode/AGENTS.md`, `AGENTS.md` | 4 roots incl. `~/.agents/skills` | `mcp.servers` in `opencode.json` |
+| 1 | OpenCode | `~/.config/opencode/AGENTS.md`, `AGENTS.md` | 4 roots incl. `~/.agents/skills` | `mcp.<name>` on 1.x, `mcp.servers` on 2.x (probed) |
 | 1 | Gemini CLI | `~/.gemini/GEMINI.md`, `GEMINI.md` | `~/.gemini/skills` | `~/.gemini/settings.json` |
 | 1 | Cursor | `AGENTS.md`, `.cursor/rules/*.mdc` | `~/.cursor/skills`, `.cursor/skills` | `~/.cursor/mcp.json` |
 | 1 | VS Code / Copilot | `AGENTS.md`, `.github/copilot-instructions.md` | — | `.vscode/mcp.json` |

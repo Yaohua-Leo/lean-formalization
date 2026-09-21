@@ -1,0 +1,11 @@
+$ D:\opencode\bin\opencode.EXE mcp list
+
+T  MCP Servers
+|
+•  ✗ lean-lsp [90mfailed
+|      EPERM: operation not permitted, chdir 'C:\Users\Leo\AppData\Local\Temp\dsh-ldvcXx\lf-opencode-ukfcd7t9' -> 'C:\Users\Leo\AppData\Local\Temp\dsh-ldvcXx\lf-opencode-ukfcd7t9'
+|      [90muvx lean-lsp-mcp
+|
+—  1 server(s)
+
+[0m

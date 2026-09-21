@@ -1,4 +1,4 @@
-# lean-formalization acceptance — 20260921T013411Z-185f48
+# lean-formalization acceptance — 20260921T030615Z-42721b
 
 - repository: `D:\新建文件夹\lean-formalization`
 - result: **PASS**
@@ -7,12 +7,14 @@
 | step | required | exit | seconds | note |
 |---|---|---|---|---|
 | validate-repo | yes | 0 | 0 |  |
-| smoke | yes | 0 | 7 | install → assert → idempotence → uninstall, plus a real Lean build |
+| smoke | yes | 0 | 8 | install → assert → idempotence → uninstall, plus a real Lean build |
 | probe-lean-lsp | yes | 0 | 1 | the exact command the lsp-fallback configuration records |
-| doctor | no | 0 | 0 | per-harness detection and file presence |
+| doctor | no | 0 | 1 | per-harness detection and file presence |
 | dry-run-target-project | no | 0 | 0 | writes nothing; the plan is inspected by the reviewer |
-| install-for-harness-probe | no | 0 | 0 | project-scope install into a throwaway Lean project |
+| install-for-harness-probe | no | 0 | 1 | install into a throwaway Lean project + home |
 | claude-mcp-list | no | 0 | 1 | informational: does Claude Code read the .mcp.json we wrote? (.mcp.json is the installer's own surface; .claude.json is not touched) |
+| codex-mcp-list | no | 0 | 0 | informational: does Codex read the config.toml we wrote? (CODEX_HOME points at the throwaway home) |
+| opencode-mcp-list | no | 0 | 1 | informational: does OpenCode read the opencode.json we wrote? (run outside a git repo: OpenCode itself may be refused permission to spawn git/uvx inside a sandbox — that is not a config failure) |
 
 ## raw output
 

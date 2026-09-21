@@ -3,6 +3,8 @@
 .lf-*/
 .uv-probe/
 *.log
+# …but the raw output of an accepted run is evidence, and is committed
+!evidence/**/*.log
 
 # python
 __pycache__/

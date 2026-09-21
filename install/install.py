@@ -117,6 +117,9 @@ class Installer:
 
         self.lean_project = self._detect_lean_project()
         self.beam = self._detect_beam()
+        # OpenCode changed its MCP config shape between 1.x and 2.x, and each major
+        # rejects the other's shape outright, so the installed version decides.
+        self.opencode_major = args.opencode_major or self._detect_opencode_major()
         self.project_cfg = self._load_or_build_project_config()
 
     # ── path expansion ──────────────────────────────────────────────────────
@@ -143,6 +146,19 @@ class Installer:
         return (self.project / "lean-toolchain").is_file() and (
             (self.project / "lakefile.toml").is_file() or (self.project / "lakefile.lean").is_file()
         )
+
+    def _detect_opencode_major(self) -> str | None:
+        """Major version of the installed OpenCode, or None when it cannot be read."""
+        exe = shutil.which("opencode")
+        if not exe:
+            return None
+        try:
+            proc = subprocess.run([exe, "--version"], capture_output=True, text=True,
+                                  timeout=30, encoding="utf-8", errors="replace")
+        except (OSError, subprocess.SubprocessError):
+            return None
+        match = re.search(r"(\d+)\.[\d.]*", (proc.stdout or "") + (proc.stderr or ""))
+        return match.group(1) if match else None
 
     def _detect_beam(self) -> dict | None:
         beam = self.spec["mcp"]["servers"]["lean-beam"]
@@ -394,10 +410,11 @@ class Installer:
                         )
                         continue
                     for server_id in self.mcp_servers_to_mount():
+                        key_path, entry, cleanup = self.json_shape(hid, server_id, mcp)
                         self.actions.append({
                             "kind": "json_entry", "path": path, "scope": target["scope"],
-                            "key_path": mcp["keyPath"], "name": server_id,
-                            "entry": self.json_entry(hid, server_id),
+                            "key_path": key_path, "name": server_id,
+                            "entry": entry, "cleanup": cleanup,
                             "label": "%s: mcp server %s -> %s" % (hid, server_id, path),
                         })
                 else:
@@ -409,18 +426,42 @@ class Installer:
                             "label": "%s: mcp server %s -> %s" % (hid, server_id, path),
                         })
 
-    def json_entry(self, hid: str, server_id: str) -> dict:
+    def json_shape(self, hid: str, server_id: str, mcp: dict) -> tuple[list[str], dict, list[str] | None]:
+        """Key path, entry object and any stale key path to clean up, for this harness."""
+        if hid == "opencode" and "shapeByMajor" in mcp:
+            shapes = mcp["shapeByMajor"]
+            default = str(mcp.get("defaultMajor", "2"))
+            if self.opencode_major is None:
+                note = ("opencode: could not read `opencode --version`; wrote the %s.x shape. "
+                        "If `opencode mcp list` says 'Configuration is invalid', re-run with "
+                        "--opencode-major 1 (or 2)." % default)
+                if note not in self.warnings:
+                    self.warnings.append(note)
+            major = self.opencode_major if self.opencode_major in shapes else default
+            shape = shapes[major]
+            cleanup = None
+            if major == "1":
+                # A 1.x install rejects `mcp.servers` outright, so an entry we wrote
+                # there with the 2.x shape must go, or the whole file stays invalid.
+                cleanup = ["mcp", "servers"]
+            return list(shape["keyPath"]), self.json_entry(hid, server_id, major), cleanup
+        return list(mcp["keyPath"]), self.json_entry(hid, server_id), None
+
+    def json_entry(self, hid: str, server_id: str, major: str | None = None) -> dict:
+        if hid == "opencode":
+            entry = {
+                "type": "local",
+                "command": self.mcp_command(server_id),
+                "environment": self.mcp_env(server_id),
+            }
+            if major == "1":
+                entry["enabled"] = True
+            return entry
         if hid in ("cursor", "gemini-cli", "claude-code"):
             return {
                 "command": self.mcp_command(server_id)[0],
                 "args": self.mcp_command(server_id)[1:],
                 "env": self.mcp_env(server_id),
-            }
-        if hid == "opencode":
-            return {
-                "type": "local",
-                "command": self.mcp_command(server_id),
-                "environment": self.mcp_env(server_id),
             }
         if hid == "vscode":
             return {
@@ -708,7 +749,30 @@ class Installer:
                 node[key] = nxt
             node = nxt
         node[action["name"]] = action["entry"]
+        self.drop_stale_entries(doc, action.get("cleanup"))
         return json.dumps(doc, indent=2) + "\n"
+
+    def drop_stale_entries(self, doc: dict, cleanup: list[str] | None) -> None:
+        """Remove our own server entries from a key path the current shape rejects."""
+        if not cleanup:
+            return
+        parent: dict | None = doc
+        for key in cleanup[:-1]:
+            nxt = parent.get(key) if isinstance(parent, dict) else None
+            parent = nxt if isinstance(nxt, dict) else None
+        if parent is None:
+            return
+        stale = parent.get(cleanup[-1])
+        if not isinstance(stale, dict):
+            return
+        ours = set(self.mcp_servers_to_mount())
+        remaining = {key: value for key, value in stale.items() if key not in ours}
+        if len(remaining) == len(stale):
+            return  # nothing of ours in there; leave the user's config alone
+        if remaining:
+            parent[cleanup[-1]] = remaining
+        else:
+            del parent[cleanup[-1]]
 
     def compose_toml_table(self, path: Path, action: dict) -> str:
         table = action["table"]
@@ -1014,6 +1078,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--no-mcp", action="store_true", help="skip every MCP server write")
     parser.add_argument("--uv-cache-dir", default=None)
     parser.add_argument("--uv-tool-dir", default=None)
+    parser.add_argument("--opencode-major", default=None, choices=["1", "2"],
+                        help="force the OpenCode MCP config shape instead of probing `opencode --version`")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--uninstall", action="store_true")
     parser.add_argument("--doctor", action="store_true")

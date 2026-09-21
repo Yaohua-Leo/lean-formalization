@@ -27,9 +27,12 @@ The summary at the time of publication:
 | Check | Result |
 |---|---|
 | `node verify/validate_repo.mjs` | see `evidence/…/report.json` |
-| `python verify/smoke.py --with-gate` | see `evidence/…/report.json` |
+| `python verify/smoke.py --with-gate` | see `evidence/…/report.json` (12 checks incl. the OpenCode shape assertion, plus a real Lean build and a whitelist pass/fail pair) |
 | `python verify/probe_mcp.py --command "uvx lean-lsp-mcp" …` | 21 tools, expected names present, `lean_build`/`lean_run_code` absent |
 | `claude mcp list` in the installed fixture | reported `lean-lsp: uvx lean-lsp-mcp` (pending approval) — the harness read the file |
+| `CODEX_HOME=<tmp> codex mcp list` | `lean-lsp` row, status `enabled` — the harness read the file |
+| `XDG_*=<tmp> opencode mcp list` | `1 server(s)`, `lean-lsp` — the harness read the file (its health check cannot spawn `uvx` inside the sandbox, which is not a config failure) |
+| independent hash re-check of `skills/PROVENANCE.md` (second implementation, not the validator) | 8/8 files match |
 | `python install/install.py --doctor` | see `evidence/…/report.json` |
 | Jordan project dry run | plan inspected, no write performed |
 
@@ -37,15 +40,18 @@ Not run, and therefore `unknown`:
 
 - any run against Windsurf, Cline, Aider, Amp, Zed, Goose, Vibe (not installed on
   the authoring machine);
+- Gemini CLI's own `mcp` listing (the subcommand hung in a non-interactive shell);
+  the written `settings.json` is only checked for JSON validity;
+- Cursor and VS Code were not restarted, and DSH was not given a new session, so no
+  harness-level confirmation exists for those three;
 - `gate/leancheck.sh` — Git Bash cannot start in the authoring environment
   (`couldn't create signal pipe, Win32 error 5`), so the POSIX gate is shipped
   unverified. Its PowerShell twin is verified by step 3;
-- `opencode mcp list` — OpenCode failed to start under the authoring sandbox
-  (`Unknown: FileSystem.open (…opencode.log)`), so no harness-level check exists
-  for the OpenCode row;
 - a real install into the authoring user's live home directory and Jordan project.
   The plan was produced with `--dry-run` and inspected; executing it is the user's
-  call.
+  call. Note that `D:\the_bible_of_Jordan` is **not** a Lean project root today (no
+  `lean-toolchain`/`lakefile` at its root), so if it is the intended target, the
+  installer must be pointed at the directory that holds the Lake project.
 
 ## Evidence layout
 

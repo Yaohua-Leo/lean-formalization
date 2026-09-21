@@ -158,7 +158,7 @@ def load_installer(args: argparse.Namespace):
         dsh_home=args.dsh_home, agents_home=args.agents_home,
         scope="both", harnesses=None, include_unverified=False,
         no_project_gate=False, no_mcp=False, uv_cache_dir=None, uv_tool_dir=None,
-        uninstall=False, doctor=False, strict=False,
+        opencode_major=None, uninstall=False, doctor=False, strict=False,
     ))
 
 

@@ -23,6 +23,25 @@ JSONC comments cannot be round-tripped safely, so the installer reports it inste
 of mangling the file. Add the `mcp` entry from `docs/harness-matrix.md` to the
 `.jsonc` file yourself, or create a plain `opencode.json`.
 
+**`opencode mcp list` says `Configuration is invalid … mcp.servers`**
+The installed OpenCode is 1.x, which names servers directly under `mcp` and
+requires `enabled: true`; the 2.x shape (`mcp.servers`) is rejected outright.
+Re-run the installer (`--opencode-major 1` if `opencode --version` cannot be read);
+it writes the matching shape and removes our own stale `mcp.servers` entries while
+leaving servers you added there. Full shapes: `docs/harness-matrix.md`.
+
+**`opencode mcp list` shows the server but with `✗ … EPERM: uv_spawn 'uvx'`**
+That is OpenCode's health check being refused permission to spawn `uvx` — a
+sandbox restriction on the process, not a configuration error. The server itself
+starts fine; confirm with
+`python verify/probe_mcp.py --command "uvx lean-lsp-mcp" …`.
+
+**`opencode` fails outright with `EPERM: operation not permitted, uv_spawn 'git'`**
+Observed when OpenCode is started inside a sandboxed shell in (or under) a git
+repository: it walks up looking for the repository and is refused permission to
+spawn `git`. Run it from a directory outside any git checkout, or start it
+normally outside the sandbox. Not a configuration problem.
+
 **I want to undo everything**
 `python install/install.py --uninstall`. It restores every file it backed up,
 deletes the files it created, and keeps `lean-formalization.json` (your config).

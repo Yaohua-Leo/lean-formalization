@@ -26,6 +26,7 @@ import secrets
 import shutil
 import subprocess
 import sys
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -45,6 +46,18 @@ class Step:
         self.code: int | None = None
         self.seconds = 0.0
         self.output = ""
+
+
+def cli(name: str, *args: str) -> list[str]:
+    """A runnable command line for a harness CLI, including Windows script shims."""
+    path = shutil.which(name)
+    if path is None:
+        return [name, *args]
+    if path.lower().endswith(".ps1"):
+        return ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", path, *args]
+    if path.lower().endswith((".cmd", ".bat")):
+        return ["cmd", "/c", path, *args]
+    return [path, *args]
 
 
 def run(step: Step) -> Step:
@@ -142,11 +155,30 @@ def main(argv: list[str] | None = None) -> int:
                            "--home", str(scratch / "harness-home"),
                            "--dsh-home", str(scratch / "harness-home" / "dsh-home"),
                            "--agents-home", str(scratch / "harness-home" / ".agents"),
-                           "--scope", "project"],
-                          required=False, note="project-scope install into a throwaway Lean project"))
-        steps.append(Step("claude-mcp-list", ["claude", "mcp", "list"], cwd=probe_project,
+                           "--scope", "both"],
+                          required=False, note="install into a throwaway Lean project + home"))
+        steps.append(Step("claude-mcp-list", cli("claude", "mcp", "list"), cwd=probe_project,
                           required=False,
                           note="informational: does Claude Code read the .mcp.json we wrote? (.mcp.json is the installer's own surface; .claude.json is not touched)"))
+        if shutil.which("codex"):
+            steps.append(Step("codex-mcp-list", cli("codex", "mcp", "list"), cwd=probe_project,
+                              env={"CODEX_HOME": str(scratch / "harness-home" / ".codex")},
+                              required=False,
+                              note="informational: does Codex read the config.toml we wrote? (CODEX_HOME points at the throwaway home)"))
+        if shutil.which("opencode"):
+            # Run outside every git repository: OpenCode walks up looking for one and,
+            # inside a sandbox, is refused permission to spawn `git` there.
+            opencode_cwd = Path(tempfile.mkdtemp(prefix="lf-opencode-"))
+            steps.append(Step("opencode-mcp-list", cli("opencode", "mcp", "list"),
+                              cwd=opencode_cwd,
+                              env={
+                                  "XDG_CONFIG_HOME": str(scratch / "harness-home" / ".config"),
+                                  "XDG_DATA_HOME": str(scratch / "harness-home" / ".local" / "share"),
+                                  "XDG_STATE_HOME": str(scratch / "harness-home" / ".local" / "state"),
+                                  "XDG_CACHE_HOME": str(scratch / "harness-home" / ".local" / "cache"),
+                              },
+                              required=False,
+                              note="informational: does OpenCode read the opencode.json we wrote? (run outside a git repo: OpenCode itself may be refused permission to spawn git/uvx inside a sandbox — that is not a config failure)"))
 
     for step in steps:
         run(step)

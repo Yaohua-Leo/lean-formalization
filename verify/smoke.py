@@ -24,6 +24,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -161,6 +162,30 @@ def main(argv: list[str] | None = None) -> int:
     except tomllib.TOMLDecodeError as exc:
         parse_failures.append("codex config.toml: %s" % exc)
     checker.check("every config file still parses", not parse_failures, "; ".join(parse_failures))
+
+    # OpenCode 1.x and 2.x take different (mutually rejected) MCP config shapes, so
+    # the written shape must match the installed major.
+    opencode_json = home / ".config" / "opencode" / "opencode.json"
+    if opencode_json.is_file():
+        doc = json.loads(opencode_json.read_text(encoding="utf-8"))
+        mcp = doc.get("mcp", {})
+        major = None
+        if shutil.which("opencode"):
+            try:
+                probe = subprocess.run(["opencode", "--version"], capture_output=True, text=True,
+                                       timeout=30, encoding="utf-8", errors="replace")
+                match = re.search(r"(\d+)\.", (probe.stdout or "") + (probe.stderr or ""))
+                major = match.group(1) if match else None
+            except (OSError, subprocess.SubprocessError):
+                major = None
+        if major == "1":
+            good = "lean-lsp" in mcp and "servers" not in mcp
+        elif major == "2":
+            good = "lean-lsp" in mcp.get("servers", {})
+        else:
+            good = "lean-lsp" in mcp or "lean-lsp" in mcp.get("servers", {})
+        checker.check("opencode config shape matches the installed major (%s)" % (major or "undetected"),
+                      good, json.dumps(mcp)[:120])
 
     # ── 2. idempotence ──────────────────────────────────────────────────────
     second = run_installer(*common, "--scope", "both")

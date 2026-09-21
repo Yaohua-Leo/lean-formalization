@@ -19,15 +19,15 @@ until the user starts a new session in that harness.
 
 ## Tier 1 — verified on the authoring machine
 
-| Harness | Instruction file(s) | Skill roots | MCP configuration | Config format |
-|---|---|---|---|---|
-| DSH (DeepSeek Harness) | rendered preset (`persona.prefix`) | `<agents>/skills`, `<DSH_HOME>/skills`, `<project>/.agents/skills`, `<project>/.dsh/skills` | `<DSH_HOME>/.agent-presets/lean/agent.cordis.yml` | YAML rows, two `dsh-mcp-client` rows |
-| Claude Code | `~/.claude/CLAUDE.md`, `<project>/CLAUDE.md` | `~/.claude/skills`, `<project>/.claude/skills` | `<project>/.mcp.json` | JSON, `mcpServers` |
-| Codex CLI | `~/.codex/AGENTS.md`, `<project>/AGENTS.md` | `~/.codex/skills` | `~/.codex/config.toml` | TOML, `[mcp_servers.<name>]` |
-| OpenCode | `~/.config/opencode/AGENTS.md`, `<project>/AGENTS.md` | `~/.config/opencode/skills`, `~/.agents/skills`, `<project>/.opencode/skills`, `<project>/.agents/skills` | `~/.config/opencode/opencode.json`, `<project>/opencode.json` | JSON, `mcp.servers` with `type: local` and an **array** `command` |
-| Gemini CLI | `~/.gemini/GEMINI.md`, `<project>/GEMINI.md` | `~/.gemini/skills` | `~/.gemini/settings.json` | JSON, top-level `mcpServers` |
-| Cursor | `<project>/AGENTS.md`, `<project>/.cursor/rules/lean-formalization.mdc` | `~/.cursor/skills`, `<project>/.cursor/skills` | `~/.cursor/mcp.json`, `<project>/.cursor/mcp.json` | JSON, `mcpServers` |
-| VS Code / GitHub Copilot | `<project>/AGENTS.md`, `<project>/.github/copilot-instructions.md` | — | `<project>/.vscode/mcp.json` | JSON, `servers` |
+| Harness | Instruction file(s) | Skill roots | MCP configuration | Config format | Status on the authoring machine |
+|---|---|---|---|---|---|
+| DSH (DeepSeek Harness) | rendered preset (`persona.prefix`) | `<agents>/skills`, `<DSH_HOME>/skills`, `<project>/.agents/skills`, `<project>/.dsh/skills` | `<DSH_HOME>/.agent-presets/lean/agent.cordis.yml` | YAML rows, two `dsh-mcp-client` rows | files written; preset parses (19–20 rows); no live session restarted |
+| Claude Code | `~/.claude/CLAUDE.md`, `<project>/CLAUDE.md` | `~/.claude/skills`, `<project>/.claude/skills` | `<project>/.mcp.json` | JSON, `mcpServers` | files written + **harness reads it** (`claude mcp list` → `lean-lsp`) |
+| Codex CLI | `~/.codex/AGENTS.md`, `<project>/AGENTS.md` | `~/.codex/skills` | `~/.codex/config.toml` | TOML, `[mcp_servers.<name>]` | files written + **harness reads it** (`codex mcp list` → `lean-lsp`, enabled) |
+| OpenCode | `~/.config/opencode/AGENTS.md`, `<project>/AGENTS.md` | `~/.config/opencode/skills`, `~/.agents/skills`, `<project>/.opencode/skills`, `<project>/.agents/skills` | `~/.config/opencode/opencode.json`, `<project>/opencode.json` | JSON; **`mcp.<name>` + `enabled` on 1.x, `mcp.servers.<name>` on 2.x** | files written + **harness reads it** (`opencode mcp list` → `1 server(s)`, `lean-lsp`) |
+| Gemini CLI | `~/.gemini/GEMINI.md`, `<project>/GEMINI.md` | `~/.gemini/skills` | `~/.gemini/settings.json` | JSON, top-level `mcpServers` | files written; the CLI's own listing was not reachable non-interactively |
+| Cursor | `<project>/AGENTS.md`, `<project>/.cursor/rules/lean-formalization.mdc` | `~/.cursor/skills`, `<project>/.cursor/skills` | `~/.cursor/mcp.json`, `<project>/.cursor/mcp.json` | JSON, `mcpServers` | files written; the GUI cannot be asked non-interactively |
+| VS Code / GitHub Copilot | `<project>/AGENTS.md`, `<project>/.github/copilot-instructions.md` | — | `<project>/.vscode/mcp.json` | JSON, `servers` | files written; the window was not reloaded |
 
 ### Where those paths came from
 
@@ -36,10 +36,28 @@ until the user starts a new session in that harness.
 | DSH | local source inspection: `packages/preset/agent-presets/src/discovery.ts` (`USER_PRESET_DIR = '.agent-presets'`) and `packages/skill/skill-filesystem/src/index.ts` (project roots `.dsh/skills`, `.agents/skills`; user roots `<dshHome>/skills`, `<agentsHome>/skills`) |
 | Claude Code | `claude mcp add --help` observed on the authoring machine (`--scope local\|user\|project`, `-e KEY=value`); project `.mcp.json` shape from the lean-lsp-mcp README; memory-file locations from the Claude Code memory documentation |
 | Codex CLI | the real `~/.codex/config.toml` on the authoring machine uses `[mcp_servers.<name>]` with `command`/`args`/`env`; `~/.codex/AGENTS.md` and `~/.codex/skills` exist there |
-| OpenCode | upstream documentation for instructions, skills and MCP servers (V2: `mcp.servers.<name>`, `type: local`, `environment`, `command` as an array; global `~/.config/opencode/AGENTS.md`; compatibility roots `~/.claude/skills`, `~/.agents/skills`) |
+| OpenCode | upstream documentation for instructions and skills; **and a correction found by running it**: the installed 1.17.8 rejects the V2 `mcp.servers` shape outright (`Configuration is invalid … Missing key mcp.servers.enabled`) and accepts `mcp.<name>` with `"enabled": true`, after which `opencode mcp list` reports the server. The installer probes `opencode --version` and writes the matching shape (`--opencode-major` overrides). Global `~/.config/opencode/AGENTS.md`; compatibility skill roots `~/.claude/skills`, `~/.agents/skills` |
 | Gemini CLI | the real `~/.gemini/settings.json` on the authoring machine has a top-level `mcpServers` object; `gemini skills install <repo> --path skills` is upstream's documented install command. `gemini mcp --help` hung for 180 s in a non-interactive shell there, which is why the installer writes the file instead of calling the CLI |
 | Cursor | the real `~/.cursor/mcp.json` uses top-level `mcpServers`; `~/.cursor/skills` exists on the authoring machine |
 | VS Code / Copilot | `code --help` lists `--add-mcp <json>`; workspace `mcp.json` uses `{"servers": {...}}` per the lean-lsp-mcp README |
+
+## Harness-level checks actually run
+
+These ask the *harness itself* whether it read what the installer wrote. They were
+run against a throwaway home (`--home <tmp>`) so the authoring user's real config
+was never touched; `verify/acceptance.py` re-runs them.
+
+| Command | Observed |
+|---|---|
+| `claude mcp list` (cwd = installed project) | `lean-lsp: uvx lean-lsp-mcp - ⏸ Pending approval (run 'claude' to approve)` — read from `.mcp.json`; Claude Code requires the user to approve project-scope servers once |
+| `CODEX_HOME=<tmp>/.codex codex mcp list` | table row `lean-lsp \| uvx \| lean-lsp-mcp \| Env: LEAN_LOG_LEVEL=*****, LEAN_MCP_DISABLED_TOOLS=***** \| Status: enabled` — read from `config.toml` |
+| `XDG_CONFIG_HOME=<tmp>/.config … opencode mcp list` | `1 server(s)`, `lean-lsp — uvx lean-lsp-mcp`; its health check reports `EPERM: uv_spawn 'uvx'` because that sandboxed process may not spawn `uvx` (the same server starts fine when probed directly) |
+| `python verify/probe_mcp.py --command "uvx lean-lsp-mcp" …` | 21 tools, `lean_goal`/`lean_diagnostic_messages`/`lean_local_search` present, `lean_build`/`lean_run_code` absent |
+
+**Not run** (so the row stays "files written" above): Gemini CLI's `mcp` subcommand
+hung for 180 s in a non-interactive shell on the authoring machine; Cursor and
+VS Code are GUIs and were not restarted; DSH needs a new session, which only the
+user can start (`--doctor` can then report what it sees).
 
 ## Tier 2 — shipped, not verified end-to-end
 
@@ -97,9 +115,29 @@ manage what they wrote:
 ```bash
 claude mcp add --scope user lean-lsp uvx lean-lsp-mcp \
   -e LEAN_LOG_LEVEL=NONE -e LEAN_MCP_DISABLED_TOOLS=lean_build,lean_run_code
-opencode mcp add lean-lsp --global -- uvx lean-lsp-mcp
+opencode mcp add lean-lsp --global --env LEAN_LOG_LEVEL=NONE -- uvx lean-lsp-mcp
 code --add-mcp '{"name":"lean-lsp","command":"uvx","args":["lean-lsp-mcp"]}'
 ```
+
+### OpenCode's two config shapes
+
+OpenCode 1.x and 2.x accept different, mutually rejected shapes for MCP servers:
+
+```jsonc
+// 1.x — names directly under `mcp`, and `enabled` is required
+{ "mcp": { "lean-lsp": { "type": "local", "command": ["uvx","lean-lsp-mcp"],
+                         "environment": { "LEAN_LOG_LEVEL": "NONE" }, "enabled": true } } }
+
+// 2.x — names under `mcp.servers`, and `disabled` (not `enabled`) is the switch
+{ "mcp": { "servers": { "lean-lsp": { "type": "local", "command": ["uvx","lean-lsp-mcp"],
+                                       "environment": { "LEAN_LOG_LEVEL": "NONE" } } } } }
+```
+
+The installer probes `opencode --version` and writes the shape that version
+accepts; `--opencode-major 1|2` forces it, and `--doctor` reports what was chosen.
+When it writes the 1.x shape it also removes *our own* stale entries from
+`mcp.servers` (leaving any server the user added there), because a 1.x install
+refuses to start at all while that key exists.
 
 ## Prerequisites
 

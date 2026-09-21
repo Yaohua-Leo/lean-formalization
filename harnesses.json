@@ -367,32 +367,55 @@
             "path": "opencode.json"
           }
         ],
-        "keyPath": [
-          "mcp",
-          "servers"
+        "versionProbe": [
+          "opencode",
+          "--version"
         ],
-        "entry": {
-          "type": "local",
-          "command": "[command, ...args]",
-          "environment": "{env}"
+        "shapeByMajor": {
+          "1": {
+            "keyPath": [
+              "mcp"
+            ],
+            "entry": {
+              "type": "local",
+              "command": "[command, ...args]",
+              "environment": "{env}",
+              "enabled": true
+            }
+          },
+          "2": {
+            "keyPath": [
+              "mcp",
+              "servers"
+            ],
+            "entry": {
+              "type": "local",
+              "command": "[command, ...args]",
+              "environment": "{env}"
+            }
+          }
         },
-        "entryNote": "OpenCode V2 uses mcp.servers (NOT mcp directly); command is an ARRAY; env key is `environment`.",
+        "defaultMajor": "2",
+        "entryNote": "OpenCode 1.x names servers directly under `mcp` and requires `enabled`; OpenCode 2.x uses `mcp.servers` and `disabled`. The installer probes `opencode --version` and writes the shape that version accepts; a config in the other shape is rejected outright by the other major (observed: 1.17.8 refuses mcp.servers with \"Configuration is invalid ... Missing key mcp.servers.enabled\"). command is an ARRAY and the env key is `environment` in both.",
         "nativeCli": [
           "opencode",
           "mcp",
           "add",
           "{name}",
           "--global",
+          "--env",
+          "KEY=VALUE",
           "--"
         ]
       },
-      "reload": "Restart OpenCode; V2 resolves MCP servers at startup.",
+      "reload": "Restart OpenCode; it resolves MCP servers at startup.",
       "verified": {
-        "paths": "vendor-doc",
+        "paths": "vendor-doc + local-inspection",
         "sourceFiles": [
           "https://opencode.ai/v2/docs/instructions",
           "https://opencode.ai/v2/docs/skills/",
-          "https://opencode.ai/v2/docs/mcp-servers/"
+          "https://opencode.ai/v2/docs/mcp-servers/ (V2 shape)",
+          "opencode --version on the authoring machine = 1.17.8, which rejects the V2 shape and accepts mcp.<name> with enabled:true; `opencode mcp list` then reports 1 server"
         ]
       }
     },
