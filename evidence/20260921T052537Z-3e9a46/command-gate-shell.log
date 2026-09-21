@@ -1,0 +1,11 @@
+$ C:\Python314\python.exe verify/check_gate_shell.py
+
+PASS block 1 parses (16 lines)
+PASS block 2 parses (71 lines)
+PASS config reader emitted 9 assignments
+PASS whitelisted target accepted (exit 0)
+PASS whitelist violation rejected (exit 1)
+PASS unreported target rejected (exit 1)
+PASS LATEST.md written at the evidence root
+
+gate shell check: OK (embedded python only; the shell wrapper needs a real bash)

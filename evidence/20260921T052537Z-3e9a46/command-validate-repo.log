@@ -1,0 +1,9 @@
+$ node verify/validate_repo.mjs
+
+harnesses     : 9 (tier 1: 7)
+skills        : lean-beam, lean-formalization
+mcp servers   : lean-lsp, lean-beam
+note          : mistral-vibe is tier 2 (config paths not verified end-to-end on the authoring machine)
+note          : generic-agents-md is tier 2 (config paths not verified end-to-end on the authoring machine)
+
+repository validation: OK

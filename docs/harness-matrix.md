@@ -63,15 +63,13 @@ user can start (`--doctor` can then report what it sees).
 
 ## Tier 2 — shipped, not verified end-to-end
 
-These are written only with `--include-unverified`, and their status must be
-reported as unverified.
+Their status must be reported as unverified. Tier-2 rows are written with
+`--include-unverified`, or by naming the harness in `--harnesses` (the force flag
+bypasses the tier gate — that is what it is for).
 
-| Tier 2 | Harness | What is written | Evidence | Not verified |
-|---|---|---|---|---|
+| Harness | What is written | Evidence | Not verified |
+|---|---|---|---|
 | Mistral Vibe | `~/.vibe/config.toml`, one `[[mcp_servers]]` per server | lean-lsp-mcp README documents the shape, including the need to delete a bare `mcp_servers = []` first | nothing was run against Vibe; it is not installed on the authoring machine |
-
-Tier-2 rows are written with `--include-unverified`, or by naming the harness in
-`--harnesses` (the force flag bypasses the tier gate — that is what it is for).
 | any AGENTS.md-aware agent (Amp, Zed, Goose, Qwen Code, Crush, …) | `<project>/AGENTS.md`, `<project>/.agents/skills`, `~/.agents/skills` | the `.agents/skills` convention is documented by OpenCode V2 as a compatibility root | no universal MCP config path exists; use the agent's own `mcp add` or settings UI |
 
 ### Deliberately not shipped

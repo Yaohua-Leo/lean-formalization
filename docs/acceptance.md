@@ -29,7 +29,7 @@ The summary at the time of publication:
 |---|---|
 | `node verify/validate_repo.mjs` | see `evidence/…/report.json` (tamper controls: editing a vendored skill **or** `licenses/lean-beam-LICENSE` now fails it) |
 | `python verify/check_gate_shell.py` | both embedded Python blocks parse; the config reader emits the assignments the shell consumes; the whitelist check accepts a whitelisted target, rejects an out-of-whitelist axiom and a never-reported target, and writes `LATEST.md` |
-| `python verify/smoke.py --with-gate` | see `evidence/…/report.json` — **16 checks, 0 failed** in the delivered run, incl. the OpenCode shape assertion, byte-level idempotence, the rendered DSH preset's contract and mode rows, a real Lean build, and a whitelist pass/fail pair |
+| `python verify/smoke.py --with-gate` | see `evidence/…/report.json` — **18 checks, 0 failed** in the delivered run (2e9e8d), incl. the OpenCode shape assertion, byte-level idempotence, the rendered DSH preset's contract and mode rows, a real Lean build, and a whitelist pass/fail pair |
 | `python verify/probe_mcp.py --command "uvx lean-lsp-mcp" …` | 21 tools, expected names present, `lean_build`/`lean_run_code` absent |
 | `claude mcp list` in the installed fixture | reported `lean-lsp: uvx lean-lsp-mcp` (pending approval) — the harness read the file |
 | `CODEX_HOME=<tmp> codex mcp list` | `lean-lsp` row, status `enabled` — the harness read the file |
